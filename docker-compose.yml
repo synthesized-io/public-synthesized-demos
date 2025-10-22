@@ -1,0 +1,98 @@
+# Environment variables for easy port changes
+# BANK_BACKEND_PORT: Host port for backend (default 8085)
+# BANK_FRONTEND_PORT: Host port for frontend (default 3005)
+# BANK_DB_PORT: Host port for Postgres DB (default 5438)
+
+services:
+  # PostgreSQL Database for Bank App
+  bank-postgres:
+    image: postgres:15-alpine
+    container_name: bank-postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: apiuser
+      POSTGRES_PASSWORD: apipassword
+    ports:
+      - "${BANK_DB_PORT:-5438}:5432"
+    volumes:
+      - bank_postgres_data:/var/lib/postgresql/data
+      - ./bank_app/database/init:/docker-entrypoint-initdb.d
+      - ./bank_app/database/sql:/docker-entrypoint-initdb.d/sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apiuser -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bank-network
+
+  # Spring Boot Backend
+  bank-backend:
+    build:
+      context: ./bank_app/backend
+      dockerfile: Dockerfile
+    container_name: bank-backend
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://bank-postgres:5432/bank_testing
+      - SPRING_DATASOURCE_USERNAME=apiuser
+      - SPRING_DATASOURCE_PASSWORD=apipassword
+      - SPRING_DATASOURCE_SEED_URL=jdbc:postgresql://bank-postgres:5432/bank_seed
+      - SPRING_DATASOURCE_SEED_USERNAME=apiuser
+      - SPRING_DATASOURCE_SEED_PASSWORD=apipassword
+      - SPRING_DATASOURCE_TESTING_URL=jdbc:postgresql://bank-postgres:5432/bank_testing
+      - SPRING_DATASOURCE_TESTING_USERNAME=apiuser
+      - SPRING_DATASOURCE_TESTING_PASSWORD=apipassword
+      - SPRING_DATASOURCE_PROD_URL=jdbc:postgresql://bank-postgres:5432/bank_prod
+      - SPRING_DATASOURCE_PROD_USERNAME=apiuser
+      - SPRING_DATASOURCE_PROD_PASSWORD=apipassword
+    ports:
+      - "${BANK_BACKEND_PORT:-8085}:8080"
+    depends_on:
+      bank-postgres:
+        condition: service_healthy
+    networks:
+      - bank-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:8080 > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # React Frontend
+  bank-frontend:
+    build:
+      context: ./bank_app/frontend
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_BACKEND_URL=http://localhost:${BANK_BACKEND_PORT:-8085}
+        - REACT_APP_FRONTEND_URL=http://localhost:${BANK_FRONTEND_PORT:-3005}
+    container_name: bank-frontend
+    ports:
+      - "${BANK_FRONTEND_PORT:-3005}:80"
+    depends_on:
+      bank-backend:
+        condition: service_healthy
+    networks:
+      - bank-network
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:${BANK_BACKEND_PORT:-8085}
+      - REACT_APP_FRONTEND_URL=http://localhost:${BANK_FRONTEND_PORT:-3005}
+
+
+  # Service shortcuts for easier access
+  bank:
+    image: alpine:latest
+    command: sh -c "echo 'Bank application started - check logs from individual services' && tail -f /dev/null"
+    depends_on:
+      - bank-postgres
+      - bank-backend
+      - bank-frontend
+
+volumes:
+  bank_postgres_data:
+    driver: local
+
+networks:
+  bank-network:
+    driver: bridge

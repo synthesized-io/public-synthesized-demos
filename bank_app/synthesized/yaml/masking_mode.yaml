@@ -1,0 +1,44 @@
+default_config:
+  mode: "KEEP"
+  use_working_directory: true
+  locale: "en-GB"
+  target_ratio: 1
+
+tables:
+  - table_name_with_schema: "bank.branches"
+    transformations:
+      - columns:
+          - "name"
+        id: "pii-bank-branches-name"
+        mode: "MASKING"
+  - table_name_with_schema: "bank.customers"
+    transformations:
+      - columns:
+          - "first_name"
+          - "last_name"
+          - "email"
+          - "phone"
+        mode: "MASKING"
+        params:
+          type: person_generator
+          column_templates:
+            - "${first_name}"
+            - "${last_name}"
+            - "${email}"
+            - "${phone_national}"
+      - columns:
+          - "customer_type"
+        id: "pii-bank-customers-customer_type"
+        mode: "MASKING"
+  - table_name_with_schema: "bank.transaction_metadata"
+    transformations:
+      - columns:
+          - "location"
+        id: "pii-bank-transaction_metadata-location"
+        mode: "MASKING"
+
+cycle_resolution_strategy: "FAIL"
+schema_creation_mode: "DROP_AND_CREATE"
+table_truncation_mode: "TRUNCATE"
+safety_mode: "RELAXED"
+use_text_column_heuristics: true

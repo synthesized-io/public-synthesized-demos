@@ -1,0 +1,41 @@
+default_config:
+  mode: "KEEP"
+  use_working_directory: true
+  locale: "en-GB"
+  target_ratio: 1.0
+
+cycle_resolution_strategy: "FAIL"
+schema_creation_mode: DROP_AND_CREATE
+table_truncation_mode: "TRUNCATE"
+safety_mode: "STRICT"
+use_text_column_heuristics: true
+
+tables:
+  - table_name_with_schema: "bank.customers"
+    transformations:
+      - columns:
+          - "first_name"
+        id: "pii-bank-customers-first_name"
+        mode: "MASKING"
+      - columns:
+          - "email"
+        id: "pii-bank-customers-email"
+        mode: "MASKING"
+      - columns:
+          - "phone"
+        id: "pii-bank-customers-phone"
+        mode: "MASKING"
+      - columns:
+          - "last_name"
+        id: "pii-bank-customers-last_name"
+        mode: "MASKING"
+      - columns:
+          - "customer_id"
+        id: "pii-bank-customers-customer_id"
+        mode: "MASKING"
+  - table_name_with_schema: "bank.transaction_metadata"
+    transformations:
+      - columns:
+          - "location"
+        id: "pii-bank-transaction_metadata-location"
+        mode: "MASKING"
