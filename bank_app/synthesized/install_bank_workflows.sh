@@ -24,8 +24,7 @@ cat >> "$TARGET_FILE" << 'EOF'
 -- Bank Demo Workflows  --
 -- -------------------- --
 
-INSERT INTO public."user" VALUES (DEFAULT, 'demo@synthesized.io', '$2a$10$s70PJ7s.oKUCWz3m46cCz.0dBDEC/20BST1lZ3Eq3v8Q9OLdukuR.', true, 'Synthesized Demo', 'user', 'OWNER', false, 'INTERNAL', 'demo@synthesized.io')
-ON CONFLICT (email) DO NOTHING;
+INSERT INTO public."user" VALUES (DEFAULT, 'demo@synthesized.io', '$2a$10$s70PJ7s.oKUCWz3m46cCz.0dBDEC/20BST1lZ3Eq3v8Q9OLdukuR.', true, 'Synthesized Demo', 'user', 'OWNER', false, 'INTERNAL', 'demo@synthesized.io');
 INSERT INTO public."project" VALUES ('01972fa4-1fe0-7395-b7ab-00b9189a9cc1', 'Bank', null, 'PRIVATE', '2025-10-13 12:00:00.000000', (SELECT id FROM public."user" WHERE email = 'demo@synthesized.io'));
 INSERT INTO public."project_member" VALUES ('01972fa6-9990-7054-0033-7e09f453a085', '01972fa4-1fe0-7395-b7ab-00b9189a9cc1', 'demo@synthesized.io', 'OWNER');
 
