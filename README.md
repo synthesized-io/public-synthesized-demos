@@ -27,20 +27,16 @@ docker compose up APPLICATION_NAME
 
 Running this will create a docker network for the application, including a frontend, backend, and database.
 
-Note that ```docker compose build``` is only necessary for the first run of an application, or when changing the ports.
+Note that ```docker compose build``` is only necessary for the first run of an application.
 
 ## Changing Application Ports
-Each application has separate default ports for the components. These can be configured within a `.env` file or by supplying new ports as arguments. 
-
-Before launching the service with new ports, the system must be rebuilt to ensure the frontend calls the correct url. E.g.
+Each application has separate default ports for the components. These can be configured within a `.env` file or by supplying new ports as arguments. E.g.
 
 ```bash
-BANK_BACKEND_PORT=8090 BANK_FRONTEND_PORT=3010 BANK_DB_PORT=5440 docker compose build bank
 BANK_BACKEND_PORT=8090 BANK_FRONTEND_PORT=3010 BANK_DB_PORT=5440 docker compose up bank
 ```
 
-If the system is still looking for the default ports, the frontend may need to be built with the new ports. 
-Please check that you have used `docker compose build`.
+The frontend proxies all API traffic through nginx, so port changes only affect the host-side port bindings and no rebuild is required.
 
 ## Configuring Synthesized for Sample Applications
 All applications come with predefined sample workflow configurations for Synthesized and an install script to prepare the Synthesized Governor system.
@@ -81,7 +77,7 @@ docker compose up bank
 #### Bank Default URLs:
 1. Frontend: http://localhost:3005
 2. Backend: http://localhost:8085
-3. Api docs: http://localhost:8085/api-docs
+3. Api docs: http://localhost:8085/api-docs (also accessible via http://localhost:3005/api-docs)
 
 #### Bank Services:
 | Service   | Description          | Default Port | Environment Variable to Change Port |
