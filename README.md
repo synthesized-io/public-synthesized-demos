@@ -60,7 +60,7 @@ docker compose up
 ```
 6. Log in as the demo user
 ```
-username: demo@synthesized.io
+username: test@synthesized.io
 password: Qq12345_
 ```
 
