@@ -64,9 +64,6 @@ services:
     build:
       context: ./bank_app/frontend
       dockerfile: Dockerfile
-      args:
-        - REACT_APP_BACKEND_URL=http://localhost:${BANK_BACKEND_PORT:-8085}
-        - REACT_APP_FRONTEND_URL=http://localhost:${BANK_FRONTEND_PORT:-3005}
     container_name: bank-frontend
     ports:
       - "${BANK_FRONTEND_PORT:-3005}:80"
@@ -75,9 +72,6 @@ services:
         condition: service_healthy
     networks:
       - bank-network
-    environment:
-      - REACT_APP_BACKEND_URL=http://localhost:${BANK_BACKEND_PORT:-8085}
-      - REACT_APP_FRONTEND_URL=http://localhost:${BANK_FRONTEND_PORT:-3005}
 
 
   # Service shortcuts for easier access
@@ -85,9 +79,14 @@ services:
     image: alpine:latest
     command: sh -c "echo 'Bank application started - check logs from individual services' && tail -f /dev/null"
     depends_on:
-      - bank-postgres
-      - bank-backend
-      - bank-frontend
+      bank-postgres:
+        condition: service_healthy
+      bank-backend:
+        condition: service_healthy
+      bank-frontend:
+        condition: service_started
+    networks:
+      - bank-network
 
 volumes:
   bank_postgres_data:
