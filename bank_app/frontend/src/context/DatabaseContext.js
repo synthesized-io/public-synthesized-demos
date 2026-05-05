@@ -9,7 +9,7 @@ export const DATABASE_OPTIONS = {
 const DatabaseContext = createContext();
 
 export function DatabaseProvider({ children }) {
-  const [selectedDatabase, setSelectedDatabase] = useState(DATABASE_OPTIONS.TESTING);
+  const [selectedDatabase, setSelectedDatabase] = useState(DATABASE_OPTIONS.PROD);
 
   return (
     <DatabaseContext.Provider value={{ selectedDatabase, setSelectedDatabase }}>
