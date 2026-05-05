@@ -79,8 +79,6 @@ function Accounts({ refreshTrigger }) {
   const accountTypes = ['Checking', 'Savings', 'Credit', 'Loan', 'Investment'];
   const statuses = ['Active', 'Closed', 'Frozen', 'Dormant', 'Overdrawn'];
 
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8085';
-
   // Handle incoming search query from navigation
   useEffect(() => {
     if (location.state?.searchQuery) {
@@ -173,7 +171,7 @@ function Accounts({ refreshTrigger }) {
       params.append('page', filtersToUse.page);
       params.append('size', filtersToUse.rowsPerPage);
 
-      const response = await fetch(`${backendUrl}/api/accounts?${params.toString()}`);
+      const response = await fetch(`/api/accounts?${params.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch accounts');
       const data = await response.json();
       setRows(data.accounts);
@@ -297,7 +295,7 @@ function Accounts({ refreshTrigger }) {
         balance: parseFloat(newAccount.balance)
       };
 
-      const response = await fetch(`${backendUrl}/api/accounts?database=${selectedDatabase}`, {
+      const response = await fetch(`/api/accounts?database=${selectedDatabase}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -317,7 +315,7 @@ function Accounts({ refreshTrigger }) {
       params.append('size', rowsPerPage);
       params.append('sortBy', orderBy);
       params.append('sortOrder', order);
-      const refreshResponse = await fetch(`${backendUrl}/api/accounts?${params.toString()}`);
+      const refreshResponse = await fetch(`/api/accounts?${params.toString()}`);
       if (!refreshResponse.ok) throw new Error('Failed to refresh accounts');
       const data = await refreshResponse.json();
       setRows(data.accounts);
@@ -349,7 +347,7 @@ function Accounts({ refreshTrigger }) {
       setIsSubmitting(true);
       setError(null);
 
-      const response = await fetch(`${backendUrl}/api/accounts/${editingAccount.accountId}?database=${selectedDatabase}`, {
+      const response = await fetch(`/api/accounts/${editingAccount.accountId}?database=${selectedDatabase}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -374,7 +372,7 @@ function Accounts({ refreshTrigger }) {
       params.append('sortOrder', order);
       params.append('page', page);
       params.append('size', rowsPerPage);
-      const refreshResponse = await fetch(`${backendUrl}/api/accounts?${params.toString()}`);
+      const refreshResponse = await fetch(`/api/accounts?${params.toString()}`);
       if (!refreshResponse.ok) throw new Error('Failed to refresh accounts');
       const data = await refreshResponse.json();
       setRows(data.accounts);
@@ -411,7 +409,7 @@ function Accounts({ refreshTrigger }) {
       if (filters.status) params.append('status', filters.status);
       if (searchQuery) params.append('search', searchQuery);
 
-      const response = await fetch(`${backendUrl}/api/accounts?${params.toString()}`);
+      const response = await fetch(`/api/accounts?${params.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch accounts');
       const data = await response.json();
       setRows(data.accounts);
@@ -451,7 +449,7 @@ function Accounts({ refreshTrigger }) {
     setDeletingId(accountId);
     setDeleteError(null);
     try {
-      const response = await fetch(`${backendUrl}/api/accounts/${accountId}?database=${selectedDatabase}`, {
+      const response = await fetch(`/api/accounts/${accountId}?database=${selectedDatabase}`, {
         method: 'DELETE',
       });
       if (!response.ok) {

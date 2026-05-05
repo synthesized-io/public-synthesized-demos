@@ -63,17 +63,15 @@ function Home({ isVisible, refreshTrigger }) {
   };
   const STATUS_LABELS = ['Frozen', 'Active', 'Overdrawn', 'Dormant', 'Closed'];
 
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8085';
-
   const handleViewDocs = () => {
-    window.open(`${backendUrl}/swagger-ui/index.html`, '_blank');
+    window.open('/swagger-ui/index.html', '_blank');
   };
 
   const fetchStatistics = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${backendUrl}/api/statistics?database=${selectedDatabase}`);
+      const response = await axios.get(`/api/statistics?database=${selectedDatabase}`);
       setStatistics(response.data);
     } catch (err) {
       setError('Failed to fetch statistics');
@@ -85,7 +83,7 @@ function Home({ isVisible, refreshTrigger }) {
   const fetchAccountStatusCounts = async () => {
     setStatusLoading(true);
     try {
-      const response = await axios.get(`${backendUrl}/api/statistics/account-status-counts?database=${selectedDatabase}`);
+      const response = await axios.get(`/api/statistics/account-status-counts?database=${selectedDatabase}`);
       setAccountStatusCounts(response.data);
     } catch (err) {
       setAccountStatusCounts(null);

@@ -21,13 +21,11 @@ function BankOperations() {
   const [success, setSuccess] = useState(null);
   const { selectedDatabase } = useDatabase();
   const theme = useTheme();
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8085';
-
   const fetchBalance = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${backendUrl}/api/balance?database=${selectedDatabase}`);
+      const response = await axios.get(`/api/balance?database=${selectedDatabase}`);
       setBalance(response.data.balance);
     } catch (err) {
       setError('Failed to fetch balance');
@@ -51,7 +49,7 @@ function BankOperations() {
     setSuccess(null);
 
     try {
-      await axios.post(`${backendUrl}/api/deposit`, {
+      await axios.post(`/api/deposit`, {
         amount: parseFloat(amount),
         database: selectedDatabase
       });
@@ -76,7 +74,7 @@ function BankOperations() {
     setSuccess(null);
 
     try {
-      await axios.post(`${backendUrl}/api/withdraw`, {
+      await axios.post(`/api/withdraw`, {
         amount: parseFloat(amount),
         database: selectedDatabase
       });

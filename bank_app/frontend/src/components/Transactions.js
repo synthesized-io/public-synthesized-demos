@@ -73,8 +73,6 @@ function Transactions({ refreshTrigger }) {
   const transactionTypes = ['Deposit', 'Withdrawal', 'Transfer', 'Payment', 'Fee'];
   const statuses = ['Pending', 'Completed', 'Failed', 'Reversed'];
 
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8085';
-
   // Handle both URL parameters and navigation state
   useEffect(() => {
     // Handle URL parameter
@@ -155,7 +153,7 @@ function Transactions({ refreshTrigger }) {
       params.append('page', filtersToUse.page);
       params.append('size', filtersToUse.rowsPerPage);
 
-      const response = await fetch(`${backendUrl}/api/transactions?${params.toString()}`);
+      const response = await fetch(`/api/transactions?${params.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch transactions');
       const data = await response.json();
       setRows(data.transactions);
@@ -286,7 +284,7 @@ function Transactions({ refreshTrigger }) {
         transactionDate: newTransaction.transactionDate + ':00'
       };
 
-      const response = await fetch(`${backendUrl}/api/transactions?database=${selectedDatabase}`, {
+      const response = await fetch(`/api/transactions?database=${selectedDatabase}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -306,7 +304,7 @@ function Transactions({ refreshTrigger }) {
       params.append('size', rowsPerPage);
       params.append('sortBy', orderBy);
       params.append('sortOrder', order);
-      const refreshResponse = await fetch(`${backendUrl}/api/transactions?${params.toString()}`);
+      const refreshResponse = await fetch(`/api/transactions?${params.toString()}`);
       if (!refreshResponse.ok) throw new Error('Failed to refresh transactions');
       const data = await refreshResponse.json();
       setRows(data.transactions);
@@ -350,7 +348,7 @@ function Transactions({ refreshTrigger }) {
       }
       if (searchQuery) params.append('searchQuery', searchQuery);
 
-      const response = await fetch(`${backendUrl}/api/transactions?${params.toString()}`);
+      const response = await fetch(`/api/transactions?${params.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch transactions');
       const data = await response.json();
       setRows(data.transactions);
@@ -376,7 +374,7 @@ function Transactions({ refreshTrigger }) {
     setDeletingId(transactionId);
     setDeleteError(null);
     try {
-      const response = await fetch(`${backendUrl}/api/transactions/${transactionId}?database=${selectedDatabase}`, {
+      const response = await fetch(`/api/transactions/${transactionId}?database=${selectedDatabase}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
