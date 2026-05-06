@@ -79,7 +79,6 @@ function Customers({ refreshTrigger }) {
   const customerTypes = ['Individual', 'Business', 'VIP', 'Government', 'Nonprofit'];
   const statuses = ['Active', 'Inactive', 'Suspended'];
 
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8085';
 
   // Handle customerId from URL query parameter
   useEffect(() => {
@@ -146,7 +145,7 @@ function Customers({ refreshTrigger }) {
       params.append('page', filtersToUse.page);
       params.append('size', filtersToUse.rowsPerPage);
 
-      const response = await fetch(`${backendUrl}/api/customers?${params.toString()}`);
+      const response = await fetch(`/api/customers?${params.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch customers');
       const data = await response.json();
       setRows(data.customers);
@@ -264,7 +263,7 @@ function Customers({ refreshTrigger }) {
         customerType: newCustomer.customerType
       };
 
-      const response = await fetch(`${backendUrl}/api/customers?database=${selectedDatabase}`, {
+      const response = await fetch(`/api/customers?database=${selectedDatabase}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -336,7 +335,7 @@ function Customers({ refreshTrigger }) {
     setDeletingId(customerId);
     setDeleteError(null);
     try {
-      const response = await fetch(`${backendUrl}/api/customers/${customerId}?database=${selectedDatabase}`, {
+      const response = await fetch(`/api/customers/${customerId}?database=${selectedDatabase}`, {
         method: 'DELETE',
       });
       if (!response.ok) {

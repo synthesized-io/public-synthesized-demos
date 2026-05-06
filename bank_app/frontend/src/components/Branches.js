@@ -51,13 +51,11 @@ function Branches({ refreshTrigger }) {
 
   const regionOptions = ['North', 'South', 'East', 'West', 'Central'];
 
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8085';
-
   const fetchBranches = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${backendUrl}/api/branches?database=${selectedDatabase}`);
+      const response = await axios.get(`/api/branches?database=${selectedDatabase}`);
       setBranches(response.data);
     } catch (err) {
       setError('Failed to fetch branches');
@@ -85,7 +83,7 @@ function Branches({ refreshTrigger }) {
   const handleSaveManager = async () => {
     try {
       const response = await axios.put(
-        `${backendUrl}/api/branches/${selectedBranch.branch_id}/manager`,
+        `/api/branches/${selectedBranch.branch_id}/manager`,
         null,
         { params: { managerName: newManagerName, database: selectedDatabase } }
       );
@@ -113,7 +111,7 @@ function Branches({ refreshTrigger }) {
     setDeletingId(branchId);
     setDeleteError(null);
     try {
-      await axios.delete(`${backendUrl}/api/branches/${branchId}`, { params: { database: selectedDatabase } });
+      await axios.delete(`/api/branches/${branchId}`, { params: { database: selectedDatabase } });
       fetchBranches();
       setConfirmDelete({ open: false, branchId: null });
     } catch (err) {
@@ -146,7 +144,7 @@ function Branches({ refreshTrigger }) {
     setIsAdding(true);
     setAddError(null);
     try {
-      await axios.post(`${backendUrl}/api/branches?database=${selectedDatabase}`, newBranch);
+      await axios.post(`/api/branches?database=${selectedDatabase}`, newBranch);
       setAddDialogOpen(false);
       fetchBranches();
     } catch (err) {
