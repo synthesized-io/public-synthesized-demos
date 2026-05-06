@@ -58,7 +58,7 @@ docker compose pull
 ```bash
 docker compose up
 ```
-6. Log in as the demo user
+6. Log in as the test user
 ```
 username: test@synthesized.io
 password: Qq12345_
@@ -89,7 +89,6 @@ docker compose up bank
 
 #### Changing Bank Ports:
 ```bash
-BANK_BACKEND_PORT=8090 BANK_FRONTEND_PORT=3010 BANK_DB_PORT=5440 docker compose build bank
 BANK_BACKEND_PORT=8090 BANK_FRONTEND_PORT=3010 BANK_DB_PORT=5440 docker compose up bank
 ```
 
