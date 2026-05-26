@@ -12,12 +12,15 @@ jobs:
       DOCKERHUB_NAMESPACE: synthesizedio
       BACKEND_IMAGE_NAME: bank-demo-backend
       FRONTEND_IMAGE_NAME: bank-demo-frontend
-      BANK_VERSION: "1.0"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           lfs: true
+
+      - name: Set short commit SHA
+        id: sha
+        run: echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -44,7 +47,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ${{ env.DOCKERHUB_NAMESPACE }}/${{ env.BACKEND_IMAGE_NAME }}:${{ env.BANK_VERSION }}
+            ${{ env.DOCKERHUB_NAMESPACE }}/${{ env.BACKEND_IMAGE_NAME }}:${{ steps.sha.outputs.short_sha }}
             ${{ env.DOCKERHUB_NAMESPACE }}/${{ env.BACKEND_IMAGE_NAME }}:latest
 
       - name: Build and push bank demo frontend
@@ -55,5 +58,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ${{ env.DOCKERHUB_NAMESPACE }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ env.BANK_VERSION }}
+            ${{ env.DOCKERHUB_NAMESPACE }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ steps.sha.outputs.short_sha }}
             ${{ env.DOCKERHUB_NAMESPACE }}/${{ env.FRONTEND_IMAGE_NAME }}:latest

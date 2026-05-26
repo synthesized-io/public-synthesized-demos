@@ -112,17 +112,19 @@ Pre-built images for the sample applications are published to Docker Hub under t
 
 ### Sample Bank App Images
 
-| Component | Image                                | Tags                |
-|-----------|--------------------------------------|---------------------|
-| Backend   | `synthesizedio/bank-demo-backend`    | `1.0`, `latest`     |
-| Frontend  | `synthesizedio/bank-demo-frontend`   | `1.0`, `latest`     |
+| Component | Image                                | Tags                              |
+|-----------|--------------------------------------|-----------------------------------|
+| Backend   | `synthesizedio/bank-demo-backend`    | `latest`, `<short-commit-sha>`    |
+| Frontend  | `synthesizedio/bank-demo-frontend`   | `latest`, `<short-commit-sha>`    |
 
 Pull the images:
 
 ```bash
-docker pull synthesizedio/bank-demo-backend:1.0
-docker pull synthesizedio/bank-demo-frontend:1.0
+docker pull synthesizedio/bank-demo-backend:latest
+docker pull synthesizedio/bank-demo-frontend:latest
 ```
+
+To pin to a specific build, use the 7-character commit SHA tag (e.g. `synthesizedio/bank-demo-backend:abc1234`).
 
 Both images are built for `linux/amd64` and `linux/arm64`.
 
@@ -131,10 +133,10 @@ Both images are built for `linux/amd64` and `linux/arm64`.
 Images are built and published automatically by [`.github/workflows/ci.yml`](.github/workflows/ci.yml) on every push to `main`. The workflow:
 
 1. Builds multi-arch (`linux/amd64`, `linux/arm64`) images from the `Dockerfile` in each component directory (`bank_app/backend`, `bank_app/frontend`).
-2. Tags each image with the version from the `BANK_VERSION` env var in the workflow and `latest`.
+2. Tags each image with the short commit SHA (immutable, one per build) and moves `latest`.
 3. Pushes both images to Docker Hub using the `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` repository secrets.
 
-To cut a new release, bump the `BANK_VERSION` value in [`.github/workflows/ci.yml`](.github/workflows/ci.yml) and merge to `main`.
+Merging to `main` is the release. No manual version bump required.
 
 ## Common Commands
 
