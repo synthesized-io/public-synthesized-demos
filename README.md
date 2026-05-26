@@ -106,6 +106,36 @@ Configuration files can be found at `bank_app/synthesized/yaml`.
 | auto_masking_mode.yaml | Prod   | Testing | A masking workflow showing how the PII scanner can be used to automatically configure a masking workflow            |
 | masking_mode.yaml      | Prod   | Testing | A masking workflow that has been configured to replace sensitive data with realistic values instead of scrubbing it |
 
+## Docker Images
+
+Pre-built images for the sample applications are published to Docker Hub under the [`synthesizedio`](https://hub.docker.com/u/synthesizedio) namespace. They can be pulled directly without cloning the repository or running `docker compose build`.
+
+### Sample Bank App Images
+
+| Component | Image                                | Tags                |
+|-----------|--------------------------------------|---------------------|
+| Backend   | `synthesizedio/bank-demo-backend`    | `1.0`, `latest`     |
+| Frontend  | `synthesizedio/bank-demo-frontend`   | `1.0`, `latest`     |
+
+Pull the images:
+
+```bash
+docker pull synthesizedio/bank-demo-backend:1.0
+docker pull synthesizedio/bank-demo-frontend:1.0
+```
+
+Both images are built for `linux/amd64` and `linux/arm64`.
+
+### Release Process
+
+Images are built and published automatically by [`.github/workflows/ci.yml`](.github/workflows/ci.yml) on every push to `main`. The workflow:
+
+1. Builds multi-arch (`linux/amd64`, `linux/arm64`) images from the `Dockerfile` in each component directory (`bank_app/backend`, `bank_app/frontend`).
+2. Tags each image with the version from the `BANK_VERSION` env var in the workflow and `latest`.
+3. Pushes both images to Docker Hub using the `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` repository secrets.
+
+To cut a new release, bump the `BANK_VERSION` value in [`.github/workflows/ci.yml`](.github/workflows/ci.yml) and merge to `main`.
+
 ## Common Commands
 
 ```bash
