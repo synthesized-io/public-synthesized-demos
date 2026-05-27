@@ -55,8 +55,8 @@ public class TransactionRepository {
         return getJdbcTemplate(databaseType).query(
             """
             SELECT t.*, tm.channel_details, tm.location, tm.device_type, tm.auth_method
-            FROM transactions t
-            LEFT JOIN transaction_metadata tm ON t.transaction_id = tm.transaction_id
+            FROM bank.transactions t
+            LEFT JOIN bank.transaction_metadata tm ON t.transaction_id = tm.transaction_id
             ORDER BY t.transaction_id
             """,
             transactionRowMapper
@@ -77,8 +77,8 @@ public class TransactionRepository {
         StringBuilder countQuery = new StringBuilder(
             """
             SELECT COUNT(*)
-            FROM transactions t
-            LEFT JOIN transaction_metadata tm ON t.transaction_id = tm.transaction_id
+            FROM bank.transactions t
+            LEFT JOIN bank.transaction_metadata tm ON t.transaction_id = tm.transaction_id
             WHERE 1=1
             """
         );
@@ -86,8 +86,8 @@ public class TransactionRepository {
         StringBuilder dataQuery = new StringBuilder(
             """
             SELECT t.*, tm.channel_details, tm.location, tm.device_type, tm.auth_method
-            FROM transactions t
-            LEFT JOIN transaction_metadata tm ON t.transaction_id = tm.transaction_id
+            FROM bank.transactions t
+            LEFT JOIN bank.transaction_metadata tm ON t.transaction_id = tm.transaction_id
             WHERE 1=1
             """
         );
@@ -95,8 +95,8 @@ public class TransactionRepository {
         List<Object> params = new ArrayList<>();
         
         if (transactionType != null && !transactionType.isEmpty()) {
-            countQuery.append(" AND t.transaction_type = ?::transaction_type_enum");
-            dataQuery.append(" AND t.transaction_type = ?::transaction_type_enum");
+            countQuery.append(" AND t.transaction_type = ?::bank.transaction_type_enum");
+            dataQuery.append(" AND t.transaction_type = ?::bank.transaction_type_enum");
             params.add(transactionType);
         }
         
@@ -194,7 +194,7 @@ public class TransactionRepository {
         Integer nextId = getJdbcTemplate(databaseType).queryForObject(
             """
             SELECT COALESCE(MAX(transaction_id), 0) + 1
-            FROM transactions
+            FROM bank.transactions
             """,
             Integer.class
         );
@@ -202,10 +202,10 @@ public class TransactionRepository {
         // Insert into transactions table with the generated ID
         getJdbcTemplate(databaseType).update(
             """
-            INSERT INTO transactions (
+            INSERT INTO bank.transactions (
                 transaction_id, account_id, transaction_type, transaction_date, 
                 amount, currency, channel
-            ) VALUES (?, ?, ?::transaction_type_enum, ?, ?, ?::currency_enum, ?::channel_enum)
+            ) VALUES (?, ?, ?::bank.transaction_type_enum, ?, ?, ?::bank.currency_enum, ?::bank.channel_enum)
             """,
             nextId,
             transaction.getAccountId(),
@@ -221,9 +221,9 @@ public class TransactionRepository {
         // Insert into transaction_metadata table
         getJdbcTemplate(databaseType).update(
             """
-            INSERT INTO transaction_metadata (
+            INSERT INTO bank.transaction_metadata (
                 transaction_id, location, device_type, auth_method
-            ) VALUES (?, ?, ?::device_type_enum, ?::auth_method_enum)
+            ) VALUES (?, ?, ?::bank.device_type_enum, ?::bank.auth_method_enum)
             """,
             nextId,
             transaction.getLocation(),
@@ -237,12 +237,12 @@ public class TransactionRepository {
     public void deleteById(int transactionId, DatabaseType databaseType) {
         // Delete from transaction_metadata first due to FK constraint
         getJdbcTemplate(databaseType).update(
-            "DELETE FROM transaction_metadata WHERE transaction_id = ?",
+            "DELETE FROM bank.transaction_metadata WHERE transaction_id = ?",
             transactionId
         );
         // Then delete from transactions
         getJdbcTemplate(databaseType).update(
-            "DELETE FROM transactions WHERE transaction_id = ?",
+            "DELETE FROM bank.transactions WHERE transaction_id = ?",
             transactionId
         );
     }
