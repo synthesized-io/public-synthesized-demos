@@ -3,17 +3,8 @@ default_config:
   locale: en-GB
   mode: GENERATION
 
-schemas:
-  - seed
-metadata:
-  schemas:
-    - input: seed
-      output: prod
-flags:
-  - SAME_DATABASE_TRANSFORMATION
-
 tables:
-  - table_name_with_schema: seed.accounts
+  - table_name_with_schema: bank.accounts
     target_row_number: 400
     transformations:
       - columns:
@@ -28,10 +19,10 @@ tables:
               Overdrawn: 0.05
               Dormant: 0.05
               Closed: 0.2
-  - table_name_with_schema: seed.branches
+  - table_name_with_schema: bank.branches
     mode: KEEP
     target_ratio: 1
-  - table_name_with_schema: seed.customers
+  - table_name_with_schema: bank.customers
     target_row_number: 100
     transformations:
       - columns:
@@ -46,7 +37,7 @@ tables:
             - "${last_name}"
             - "${email}"
             - "${phone_national}"
-  - table_name_with_schema: seed.transactions
+  - table_name_with_schema: bank.transactions
     target_row_number: 5000
     transformations:
       - columns:
@@ -96,7 +87,7 @@ tables:
                 max: 100000.00
                 std: 10000.00
                 numeric_type: DOUBLE
-  - table_name_with_schema: seed.transaction_metadata
+  - table_name_with_schema: bank.transaction_metadata
     target_row_number: 5000
     transformations:
       - columns:
