@@ -44,27 +44,27 @@ public class BranchRepository {
 
     public List<Branch> findAll(DatabaseType databaseType) {
         return getJdbcTemplate(databaseType).query(
-            "SELECT branch_id, name, region, manager_name FROM branches",
+            "SELECT branch_id, name, region, manager_name FROM bank.branches",
             branchRowMapper
         );
     }
 
     public void updateManager(DatabaseType databaseType, Long branchId, String managerName) {
         getJdbcTemplate(databaseType).update(
-            "UPDATE branches SET manager_name = ? WHERE branch_id = ?",
+            "UPDATE bank.branches SET manager_name = ? WHERE branch_id = ?",
             managerName, branchId
         );
     }
 
     public void deleteById(DatabaseType databaseType, Integer branchId) {
         getJdbcTemplate(databaseType).update(
-            "DELETE FROM branches WHERE branch_id = ?",
+            "DELETE FROM bank.branches WHERE branch_id = ?",
             branchId
         );
     }
 
     public Branch create(DatabaseType databaseType, Branch branch) {
-        String sql = "INSERT INTO branches (name, region, manager_name) VALUES (?, ?::region_enum, ?) RETURNING branch_id, name, region, manager_name";
+        String sql = "INSERT INTO bank.branches (name, region, manager_name) VALUES (?, ?::bank.region_enum, ?) RETURNING branch_id, name, region, manager_name";
         return getJdbcTemplate(databaseType).queryForObject(
             sql,
             branchRowMapper,

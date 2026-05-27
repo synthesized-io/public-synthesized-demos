@@ -31,28 +31,28 @@ public class StatisticsRepository {
 
     public long getTransactionCount(DatabaseType databaseType) {
         return getJdbcTemplate(databaseType).queryForObject(
-            "SELECT COUNT(*) FROM transactions",
+            "SELECT COUNT(*) FROM bank.transactions",
             Long.class
         );
     }
 
     public long getCustomerCount(DatabaseType databaseType) {
         return getJdbcTemplate(databaseType).queryForObject(
-            "SELECT COUNT(*) FROM customers",
+            "SELECT COUNT(*) FROM bank.customers",
             Long.class
         );
     }
 
     public long getAccountCount(DatabaseType databaseType) {
         return getJdbcTemplate(databaseType).queryForObject(
-            "SELECT COUNT(*) FROM accounts",
+            "SELECT COUNT(*) FROM bank.accounts",
             Long.class
         );
     }
 
     public long getBranchCount(DatabaseType databaseType) {
         return getJdbcTemplate(databaseType).queryForObject(
-            "SELECT COUNT(*) FROM branches",
+            "SELECT COUNT(*) FROM bank.branches",
             Long.class
         );
     }

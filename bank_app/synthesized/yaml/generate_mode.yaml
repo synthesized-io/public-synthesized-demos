@@ -3,28 +3,19 @@ default_config:
   locale: en-GB
   mode: GENERATION
   target_ratio: 5
-
-schemas:
-  - prod
-metadata:
-  schemas:
-    - input: prod
-      output: testing
-flags:
-  - SAME_DATABASE_TRANSFORMATION
   
 tables:
-  - table_name_with_schema: prod.accounts
+  - table_name_with_schema: bank.accounts
     target_row_number: 1000
     transformations:
       - columns:
            - status
         params:
           type: categorical_generator
-  - table_name_with_schema: prod.branches
+  - table_name_with_schema: bank.branches
     mode: KEEP
     target_ratio: 1
-  - table_name_with_schema: prod.customers
+  - table_name_with_schema: bank.customers
     transformations:
       - columns:
         - first_name
@@ -38,7 +29,7 @@ tables:
             - "${last_name}"
             - "${email}"
             - "${phone_national}"
-  - table_name_with_schema: prod.transactions
+  - table_name_with_schema: bank.transactions
     transformations:
       - columns:
           - transaction_type
@@ -87,13 +78,13 @@ tables:
                 max: 100000.00
                 std: 10000.00
                 numeric_type: DOUBLE
-  - table_name_with_schema: prod.transaction_metadata
+  - table_name_with_schema: bank.transaction_metadata
     transformations:
       - columns:
         - transaction_id
         params:
           type: int_sequence_generator
-          start_from: 1
+          start_from: 0
       - columns:
           - channel_details
           - device_type
