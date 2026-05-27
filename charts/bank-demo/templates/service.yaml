@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "bank-demo.fullname" . }}
+  labels:
+    {{- include "bank-demo.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 5432
+      protocol: TCP
+  selector:
+    {{- include "bank-demo.selectorLabels" . | nindent 4 }}

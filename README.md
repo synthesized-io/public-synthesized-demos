@@ -138,6 +138,8 @@ The database image extends `postgres:15-alpine` and initializes the `bank` datab
 | `prod`    | Larger demo production dataset                             |
 | `testing` | Empty target schema where workflow runs can migrate data   |
 
+The Helm chart for deploying the database in Kubernetes is available at `charts/bank-demo`.
+
 Run the database image directly:
 
 ```bash
