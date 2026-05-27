@@ -4,6 +4,15 @@ default_config:
   locale: "en-GB"
   target_ratio: 1.0
 
+schemas:
+  - prod
+metadata:
+  schemas:
+    - input: prod
+      output: testing
+flags:
+  - SAME_DATABASE_TRANSFORMATION
+
 cycle_resolution_strategy: "FAIL"
 schema_creation_mode: DROP_AND_CREATE
 table_truncation_mode: "TRUNCATE"
@@ -11,7 +20,7 @@ safety_mode: "STRICT"
 use_text_column_heuristics: true
 
 tables:
-  - table_name_with_schema: "bank.customers"
+  - table_name_with_schema: "prod.customers"
     transformations:
       - columns:
           - "first_name"
@@ -33,7 +42,7 @@ tables:
           - "customer_id"
         id: "pii-bank-customers-customer_id"
         mode: "MASKING"
-  - table_name_with_schema: "bank.transaction_metadata"
+  - table_name_with_schema: "prod.transaction_metadata"
     transformations:
       - columns:
           - "location"

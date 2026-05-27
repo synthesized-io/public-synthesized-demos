@@ -9,7 +9,7 @@ services:
     image: postgres:15-alpine
     container_name: bank-postgres
     environment:
-      POSTGRES_DB: postgres
+      POSTGRES_DB: bank
       POSTGRES_USER: apiuser
       POSTGRES_PASSWORD: apipassword
     ports:
@@ -34,16 +34,16 @@ services:
     container_name: bank-backend
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://bank-postgres:5432/bank_testing
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://bank-postgres:5432/bank?currentSchema=testing
       - SPRING_DATASOURCE_USERNAME=apiuser
       - SPRING_DATASOURCE_PASSWORD=apipassword
-      - SPRING_DATASOURCE_SEED_URL=jdbc:postgresql://bank-postgres:5432/bank_seed
+      - SPRING_DATASOURCE_SEED_URL=jdbc:postgresql://bank-postgres:5432/bank?currentSchema=seed
       - SPRING_DATASOURCE_SEED_USERNAME=apiuser
       - SPRING_DATASOURCE_SEED_PASSWORD=apipassword
-      - SPRING_DATASOURCE_TESTING_URL=jdbc:postgresql://bank-postgres:5432/bank_testing
+      - SPRING_DATASOURCE_TESTING_URL=jdbc:postgresql://bank-postgres:5432/bank?currentSchema=testing
       - SPRING_DATASOURCE_TESTING_USERNAME=apiuser
       - SPRING_DATASOURCE_TESTING_PASSWORD=apipassword
-      - SPRING_DATASOURCE_PROD_URL=jdbc:postgresql://bank-postgres:5432/bank_prod
+      - SPRING_DATASOURCE_PROD_URL=jdbc:postgresql://bank-postgres:5432/bank?currentSchema=prod
       - SPRING_DATASOURCE_PROD_USERNAME=apiuser
       - SPRING_DATASOURCE_PROD_PASSWORD=apipassword
     ports:

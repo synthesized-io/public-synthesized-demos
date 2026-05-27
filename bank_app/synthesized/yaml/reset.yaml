@@ -2,5 +2,14 @@ default_config:
   mode: KEEP
   target_ratio: 0
 
+schemas:
+  - prod
+metadata:
+  schemas:
+    - input: prod
+      output: testing
+flags:
+  - SAME_DATABASE_TRANSFORMATION
+
 schema_creation_mode: DROP_AND_CREATE
 safety_mode: RELAXED

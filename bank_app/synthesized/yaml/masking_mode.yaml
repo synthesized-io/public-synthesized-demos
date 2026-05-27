@@ -4,14 +4,23 @@ default_config:
   locale: "en-GB"
   target_ratio: 1
 
+schemas:
+  - prod
+metadata:
+  schemas:
+    - input: prod
+      output: testing
+flags:
+  - SAME_DATABASE_TRANSFORMATION
+
 tables:
-  - table_name_with_schema: "bank.branches"
+  - table_name_with_schema: "prod.branches"
     transformations:
       - columns:
           - "name"
         id: "pii-bank-branches-name"
         mode: "MASKING"
-  - table_name_with_schema: "bank.customers"
+  - table_name_with_schema: "prod.customers"
     transformations:
       - columns:
           - "first_name"
@@ -30,7 +39,7 @@ tables:
           - "customer_type"
         id: "pii-bank-customers-customer_type"
         mode: "MASKING"
-  - table_name_with_schema: "bank.transaction_metadata"
+  - table_name_with_schema: "prod.transaction_metadata"
     transformations:
       - columns:
           - "location"

@@ -6,7 +6,7 @@ This repository contains sample applications that can be used to demonstrate and
 
 Each application follows the same pattern:
 1. A docker deployment for the application
-2. A database service with separate databases for:
+2. A database service with separate schemas for:
    1. Seed - A small amount of sample data used for data generation
    2. Prod - The example production database
    3. Testing - The example test database, empty by default
@@ -116,23 +116,48 @@ Pre-built images for the sample applications are published to Docker Hub under t
 |-----------|--------------------------------------|-----------------------------------|
 | Backend   | `synthesizedio/bank-demo-backend`    | `latest`, `<short-commit-sha>`    |
 | Frontend  | `synthesizedio/bank-demo-frontend`   | `latest`, `<short-commit-sha>`    |
+| Database  | `synthesizedio/bank-demo-database`   | `latest`, `<short-commit-sha>`    |
 
 Pull the images:
 
 ```bash
 docker pull synthesizedio/bank-demo-backend:latest
 docker pull synthesizedio/bank-demo-frontend:latest
+docker pull synthesizedio/bank-demo-database:latest
 ```
 
 To pin to a specific build, use the 7-character commit SHA tag (e.g. `synthesizedio/bank-demo-backend:abc1234`).
 
-Both images are built for `linux/amd64` and `linux/arm64`.
+All images are built for `linux/amd64` and `linux/arm64`.
+
+The database image extends `postgres:15-alpine` and initializes the `bank` database with three schemas on first startup:
+
+| Schema    | Description                                                |
+|-----------|------------------------------------------------------------|
+| `seed`    | Small sample dataset used as the source for generation     |
+| `prod`    | Larger demo production dataset                             |
+| `testing` | Empty target schema where workflow runs can migrate data   |
+
+Run the database image directly:
+
+```bash
+docker run --rm \
+  -e POSTGRES_DB=bank \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgrespassword \
+  -e BANK_DB_USER=apiuser \
+  -e BANK_DB_PASSWORD=apipassword \
+  -p 5438:5432 \
+  synthesizedio/bank-demo-database:latest
+```
+
+`POSTGRES_USER` / `POSTGRES_PASSWORD` configure the bootstrap Postgres superuser. `BANK_DB_USER` / `BANK_DB_PASSWORD` configure the runtime user that owns the `seed`, `prod`, and `testing` schemas and can read, write, and recreate them for workflow runs. Backend connections select a schema through the PostgreSQL `currentSchema` JDBC parameter, for example `jdbc:postgresql://localhost:5438/bank?currentSchema=testing`.
 
 ### Release Process
 
 Images are built and published automatically by [`.github/workflows/ci.yml`](.github/workflows/ci.yml) on every push to `main`. The workflow:
 
-1. Builds multi-arch (`linux/amd64`, `linux/arm64`) images from the `Dockerfile` in each component directory (`bank_app/backend`, `bank_app/frontend`).
+1. Builds multi-arch (`linux/amd64`, `linux/arm64`) images from the `Dockerfile` in each component directory (`bank_app/backend`, `bank_app/frontend`, `bank_app/database`).
 2. Tags each image with the short commit SHA (immutable, one per build) and moves `latest`.
 3. Pushes both images to Docker Hub using the `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` repository secrets.
 
