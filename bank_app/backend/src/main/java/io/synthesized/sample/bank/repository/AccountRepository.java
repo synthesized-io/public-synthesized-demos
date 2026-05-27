@@ -49,7 +49,7 @@ public class AccountRepository {
         return getJdbcTemplate(databaseType).query(
             """
             SELECT account_id, customer_id, account_type, status, balance
-            FROM bank.accounts
+            FROM accounts
             ORDER BY account_id ASC
             """,
             accountRowMapper
@@ -70,7 +70,7 @@ public class AccountRepository {
         StringBuilder countQuery = new StringBuilder(
             """
             SELECT COUNT(*)
-            FROM bank.accounts
+            FROM accounts
             WHERE 1=1
             """
         );
@@ -78,7 +78,7 @@ public class AccountRepository {
         StringBuilder dataQuery = new StringBuilder(
             """
             SELECT account_id, customer_id, account_type, status, balance
-            FROM bank.accounts
+            FROM accounts
             WHERE 1=1
             """
         );
@@ -86,14 +86,14 @@ public class AccountRepository {
         List<Object> params = new ArrayList<>();
         
         if (accountType != null && !accountType.isEmpty()) {
-            countQuery.append(" AND account_type = ?::bank.account_type_enum");
-            dataQuery.append(" AND account_type = ?::bank.account_type_enum");
+            countQuery.append(" AND account_type = ?::account_type_enum");
+            dataQuery.append(" AND account_type = ?::account_type_enum");
             params.add(accountType);
         }
         
         if (status != null && !status.isEmpty()) {
-            countQuery.append(" AND status = ?::bank.account_status_enum");
-            dataQuery.append(" AND status = ?::bank.account_status_enum");
+            countQuery.append(" AND status = ?::account_status_enum");
+            dataQuery.append(" AND status = ?::account_status_enum");
             params.add(status);
         }
 
@@ -173,7 +173,7 @@ public class AccountRepository {
         Integer nextId = getJdbcTemplate(databaseType).queryForObject(
             """
             SELECT COALESCE(MAX(account_id), 0) + 1
-            FROM bank.accounts
+            FROM accounts
             """,
             Integer.class
         );
@@ -181,9 +181,9 @@ public class AccountRepository {
         // Insert with the generated ID
         getJdbcTemplate(databaseType).update(
             """
-            INSERT INTO bank.accounts (
+            INSERT INTO accounts (
                 customer_id, account_type, status, balance
-            ) VALUES (?, ?::bank.account_type_enum, ?::bank.account_status_enum, ?)
+            ) VALUES (?, ?::account_type_enum, ?::account_status_enum, ?)
             """,
             account.getCustomerId(),
             account.getAccountType(),
@@ -200,7 +200,7 @@ public class AccountRepository {
         Account existingAccount = getJdbcTemplate(databaseType).queryForObject(
             """
             SELECT account_id, customer_id, account_type, status, balance
-            FROM bank.accounts
+            FROM accounts
             WHERE account_id = ?
             """,
             accountRowMapper,
@@ -214,8 +214,8 @@ public class AccountRepository {
         // Update status
         getJdbcTemplate(databaseType).update(
             """
-            UPDATE bank.accounts
-            SET status = ?::bank.account_status_enum
+            UPDATE accounts
+            SET status = ?::account_status_enum
             WHERE account_id = ?
             """,
             status, accountId
@@ -225,7 +225,7 @@ public class AccountRepository {
         return getJdbcTemplate(databaseType).queryForObject(
             """
             SELECT account_id, customer_id, account_type, status, balance
-            FROM bank.accounts
+            FROM accounts
             WHERE account_id = ?
             """,
             accountRowMapper,
@@ -234,7 +234,7 @@ public class AccountRepository {
     }
 
     public java.util.Map<String, Integer> countAccountsByStatus(DatabaseType databaseType) {
-        String sql = "SELECT status, COUNT(*) as count FROM bank.accounts GROUP BY status";
+        String sql = "SELECT status, COUNT(*) as count FROM accounts GROUP BY status";
         return getJdbcTemplate(databaseType).query(sql, rs -> {
             java.util.Map<String, Integer> result = new java.util.HashMap<>();
             while (rs.next()) {
@@ -247,17 +247,17 @@ public class AccountRepository {
     public void deleteById(int accountId, DatabaseType databaseType) {
         // Delete transaction metadata for all transactions of this account
         getJdbcTemplate(databaseType).update(
-            "DELETE FROM bank.transaction_metadata WHERE transaction_id IN (SELECT transaction_id FROM bank.transactions WHERE account_id = ?)",
+            "DELETE FROM transaction_metadata WHERE transaction_id IN (SELECT transaction_id FROM transactions WHERE account_id = ?)",
             accountId
         );
         // Delete related transactions
         getJdbcTemplate(databaseType).update(
-            "DELETE FROM bank.transactions WHERE account_id = ?",
+            "DELETE FROM transactions WHERE account_id = ?",
             accountId
         );
         // Then delete the account
         getJdbcTemplate(databaseType).update(
-            "DELETE FROM bank.accounts WHERE account_id = ?",
+            "DELETE FROM accounts WHERE account_id = ?",
             accountId
         );
     }

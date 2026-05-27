@@ -56,14 +56,14 @@ public class CustomerRepository {
         DatabaseType databaseType = DatabaseType.valueOf(database.toUpperCase());
         StringBuilder sql = new StringBuilder(
             "SELECT c.*, array_agg(ca.account_id) as account_ids " +
-            "FROM bank.customers c " +
-            "LEFT JOIN bank.accounts ca ON c.customer_id = ca.customer_id " +
+            "FROM customers c " +
+            "LEFT JOIN accounts ca ON c.customer_id = ca.customer_id " +
             "WHERE 1=1 "
         );
         List<Object> params = new ArrayList<>();
 
         if (customerType != null && !customerType.isEmpty()) {
-            sql.append(" AND c.customer_type = ?::bank.customer_type_enum");
+            sql.append(" AND c.customer_type = ?::customer_type_enum");
             params.add(customerType);
         }
         if (customerId != null && !customerId.isEmpty()) {
@@ -102,13 +102,13 @@ public class CustomerRepository {
         DatabaseType databaseType = DatabaseType.valueOf(database.toUpperCase());
         StringBuilder sql = new StringBuilder(
             "SELECT COUNT(DISTINCT c.customer_id) " +
-            "FROM bank.customers c " +
+            "FROM customers c " +
             "WHERE 1=1 "
         );
         List<Object> params = new ArrayList<>();
 
         if (customerType != null && !customerType.isEmpty()) {
-            sql.append(" AND c.customer_type = ?::bank.customer_type_enum");
+            sql.append(" AND c.customer_type = ?::customer_type_enum");
             params.add(customerType);
         }
         if (customerId != null && !customerId.isEmpty()) {
@@ -129,8 +129,8 @@ public class CustomerRepository {
         DatabaseType databaseType = DatabaseType.valueOf(database.toUpperCase());
         String sql = 
             "SELECT c.*, array_agg(ca.account_id) as account_ids " +
-            "FROM bank.customers c " +
-            "LEFT JOIN bank.accounts ca ON c.customer_id = ca.customer_id " +
+            "FROM customers c " +
+            "LEFT JOIN accounts ca ON c.customer_id = ca.customer_id " +
             "WHERE c.customer_id = ? " +
             "GROUP BY c.customer_id, c.first_name, c.last_name, c.email, c.phone, c.customer_type, c.created_at";
         
@@ -152,8 +152,8 @@ public class CustomerRepository {
 
     public Customer create(String database, Customer customer) {
         DatabaseType databaseType = DatabaseType.valueOf(database.toUpperCase());
-        String sql = "INSERT INTO bank.customers (first_name, last_name, email, phone, customer_type) " +
-                "VALUES (?, ?, ?, ?, ?::bank.customer_type_enum) RETURNING *";
+        String sql = "INSERT INTO customers (first_name, last_name, email, phone, customer_type) " +
+                "VALUES (?, ?, ?, ?, ?::customer_type_enum) RETURNING *";
         
         return getJdbcTemplate(databaseType).queryForObject(sql, customerRowMapper,
                 customer.getFirstName(),
@@ -167,30 +167,30 @@ public class CustomerRepository {
         DatabaseType databaseType = DatabaseType.valueOf(database.toUpperCase());
         // Get all account IDs for this customer
         List<Integer> accountIds = getJdbcTemplate(databaseType).query(
-            "SELECT account_id FROM bank.accounts WHERE customer_id = ?",
+            "SELECT account_id FROM accounts WHERE customer_id = ?",
             (rs, rowNum) -> rs.getInt("account_id"),
             customerId
         );
         for (Integer accountId : accountIds) {
             // Delete transaction metadata for all transactions of this account
             getJdbcTemplate(databaseType).update(
-                "DELETE FROM bank.transaction_metadata WHERE transaction_id IN (SELECT transaction_id FROM bank.transactions WHERE account_id = ?)",
+                "DELETE FROM transaction_metadata WHERE transaction_id IN (SELECT transaction_id FROM transactions WHERE account_id = ?)",
                 accountId
             );
             // Delete related transactions
             getJdbcTemplate(databaseType).update(
-                "DELETE FROM bank.transactions WHERE account_id = ?",
+                "DELETE FROM transactions WHERE account_id = ?",
                 accountId
             );
             // Delete the account
             getJdbcTemplate(databaseType).update(
-                "DELETE FROM bank.accounts WHERE account_id = ?",
+                "DELETE FROM accounts WHERE account_id = ?",
                 accountId
             );
         }
         // Finally, delete the customer
         getJdbcTemplate(databaseType).update(
-            "DELETE FROM bank.customers WHERE customer_id = ?",
+            "DELETE FROM customers WHERE customer_id = ?",
             customerId
         );
     }
