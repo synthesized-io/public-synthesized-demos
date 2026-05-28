@@ -23,11 +23,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{- define "bank-demo.externalHost" -}}
-{{- printf "%s-%s.%s" .Values.external.hostnamePrefix .Release.Namespace (required "dbExposure.domain is required when dbExposure.enabled=true" .Values.dbExposure.domain) -}}
+{{- printf "%s-%s.%s" (required "external.hostnamePrefix is required when using external JDBC URLs" .Values.external.hostnamePrefix) .Release.Namespace (required "dbExposure.domain is required when using external JDBC URLs" .Values.dbExposure.domain) -}}
 {{- end }}
 
 {{- define "bank-demo.connectionHost" -}}
-{{- if and .Values.dbExposure.enabled .Values.external.enabled -}}
+{{- if .Values.dbExposure.domain -}}
 {{- include "bank-demo.externalHost" . -}}
 {{- else -}}
 {{- include "bank-demo.fullname" . -}}
