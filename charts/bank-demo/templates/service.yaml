@@ -12,3 +12,4 @@ spec:
       protocol: TCP
   selector:
     {{- include "bank-demo.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: database

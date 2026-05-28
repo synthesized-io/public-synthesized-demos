@@ -13,16 +13,19 @@ metadata:
   name: {{ include "bank-demo.fullname" . }}
   labels:
     {{- include "bank-demo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
 spec:
   replicas: 1
   selector:
     matchLabels:
       {{- include "bank-demo.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: database
   serviceName: {{ include "bank-demo.fullname" . }}
   template:
     metadata:
       labels:
         {{- include "bank-demo.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: database
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
