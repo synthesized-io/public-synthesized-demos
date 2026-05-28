@@ -1,0 +1,100 @@
+{{- if .Values.backend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.backend.name }}
+  labels:
+    {{- include "bank-demo.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "bank-demo.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: backend
+  template:
+    metadata:
+      labels:
+        {{- include "bank-demo.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: backend
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.backend.name }}
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.backend.container.port }}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: docker
+            - name: BANK_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.database.secretName }}
+                  key: {{ .Values.backend.database.usernameKey }}
+            - name: BANK_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.database.secretName }}
+                  key: {{ .Values.backend.database.passwordKey }}
+            - name: SPRING_DATASOURCE_USERNAME
+              value: $(BANK_DB_USERNAME)
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: $(BANK_DB_PASSWORD)
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.database.secretName }}
+                  key: {{ .Values.backend.database.jdbcUrlKeys.testing }}
+            - name: SPRING_DATASOURCE_SEED_USERNAME
+              value: $(BANK_DB_USERNAME)
+            - name: SPRING_DATASOURCE_SEED_PASSWORD
+              value: $(BANK_DB_PASSWORD)
+            - name: SPRING_DATASOURCE_SEED_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.database.secretName }}
+                  key: {{ .Values.backend.database.jdbcUrlKeys.seed }}
+            - name: SPRING_DATASOURCE_PROD_USERNAME
+              value: $(BANK_DB_USERNAME)
+            - name: SPRING_DATASOURCE_PROD_PASSWORD
+              value: $(BANK_DB_PASSWORD)
+            - name: SPRING_DATASOURCE_PROD_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.database.secretName }}
+                  key: {{ .Values.backend.database.jdbcUrlKeys.prod }}
+            - name: SPRING_DATASOURCE_TESTING_USERNAME
+              value: $(BANK_DB_USERNAME)
+            - name: SPRING_DATASOURCE_TESTING_PASSWORD
+              value: $(BANK_DB_PASSWORD)
+            - name: SPRING_DATASOURCE_TESTING_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.database.secretName }}
+                  key: {{ .Values.backend.database.jdbcUrlKeys.testing }}
+          readinessProbe:
+            httpGet:
+              path: /api-docs
+              port: {{ .Values.backend.container.port }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

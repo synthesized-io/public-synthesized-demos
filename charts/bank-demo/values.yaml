@@ -66,6 +66,64 @@ persistence:
   accessMode: ReadWriteOnce
   size: 10Gi
 
+backend:
+  enabled: false
+  name: bank-backend
+  replicaCount: 1
+  image:
+    repository: synthesizedio/bank-demo-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  container:
+    port: 8080
+  service:
+    type: ClusterIP
+    port: 8080
+  database:
+    secretName: bank-database-credentials
+    usernameKey: username
+    passwordKey: password
+    jdbcUrlKeys:
+      seed: jdbc-url-seed
+      prod: jdbc-url-prod
+      testing: jdbc-url-testing
+
+frontend:
+  enabled: false
+  name: bank-frontend
+  replicaCount: 1
+  image:
+    repository: synthesizedio/bank-demo-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 128Mi
+  container:
+    port: 80
+  service:
+    type: ClusterIP
+    port: 80
+
+ingress:
+  enabled: false
+  name: bank-demo
+  ingressClassName: alb
+  annotations: {}
+  hosts: []
+  tls: []
+
 nodeSelector: {}
 tolerations: []
 affinity: {}

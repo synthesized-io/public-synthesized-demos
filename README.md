@@ -132,7 +132,7 @@ All images are built for `linux/amd64` and `linux/arm64`.
 
 The database image starts from `postgres:15-alpine` and packages the Bank demo initialization scripts. On first startup it creates the existing Bank demo databases: `bank_seed`, `bank_prod`, and `bank_testing`.
 
-The Helm chart for deploying the Bank demo database in Kubernetes is available at `charts/bank-demo`. It follows the existing database layout and exposes generated credentials plus JDBC URLs through a Kubernetes Secret.
+The Helm chart for deploying the Bank demo database, backend, and frontend in Kubernetes is available at `charts/bank-demo`. It follows the existing database layout and exposes generated credentials plus JDBC URLs through a Kubernetes Secret.
 
 ### Release Process
 
