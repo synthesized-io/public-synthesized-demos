@@ -1,0 +1,137 @@
+{{- $sslEnabled := .Values.ssl.enabled }}
+{{- $certManagerEnabled := and $sslEnabled .Values.ssl.certManager.enabled }}
+{{- $existingSecretName := and $sslEnabled .Values.ssl.existingSecretName }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "bank-demo.fullname" . }}
+  labels:
+    {{- include "bank-demo.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "bank-demo.selectorLabels" . | nindent 6 }}
+  serviceName: {{ include "bank-demo.fullname" . }}
+  template:
+    metadata:
+      labels:
+        {{- include "bank-demo.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if $sslEnabled }}
+      initContainers:
+        - name: {{ include "bank-demo.fullname" . }}-ssl
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              cert_dir="/var/lib/postgresql/data/certs"
+              mkdir -p "$cert_dir"
+              {{- if or $certManagerEnabled $existingSecretName }}
+              cp /tls-secret/tls.crt "$cert_dir/server.crt"
+              cp /tls-secret/tls.key "$cert_dir/server.key"
+              {{- else }}
+              if [ ! -s "$cert_dir/server.key" ] || [ ! -s "$cert_dir/server.crt" ]; then
+                cn="${SSL_CERT_CN:-postgres}"
+                openssl req -new -x509 -days 3650 -nodes -text \
+                  -subj "/CN=${cn}" \
+                  -keyout "$cert_dir/server.key" \
+                  -out "$cert_dir/server.crt"
+                chmod 600 "$cert_dir/server.key"
+              fi
+              {{- end }}
+              pg_uid="$(id -u postgres)"
+              pg_gid="$(id -g postgres)"
+              chown "$pg_uid:$pg_gid" "$cert_dir" "$cert_dir/server.key" "$cert_dir/server.crt"
+              chmod 700 "$cert_dir"
+              chmod 600 "$cert_dir/server.key"
+          env:
+            - name: SSL_CERT_CN
+              value: {{ include "bank-demo.connectionHost" . | quote }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            {{- if or $certManagerEnabled $existingSecretName }}
+            - name: tls-secret
+              mountPath: /tls-secret
+              readOnly: true
+            {{- end }}
+          resources:
+            {{- toYaml .Values.sslInitResources | nindent 12 }}
+      {{- end }}
+      containers:
+        - name: {{ include "bank-demo.fullname" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if $sslEnabled }}
+          args:
+            - "-c"
+            - "ssl=on"
+            - "-c"
+            - "ssl_cert_file=/var/lib/postgresql/data/certs/server.crt"
+            - "-c"
+            - "ssl_key_file=/var/lib/postgresql/data/certs/server.key"
+          {{- end }}
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.database.bootstrapName | quote }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secretName }}
+                  key: {{ .Values.database.usernameKey }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secretName }}
+                  key: {{ .Values.database.passwordKey }}
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - psql -U "$POSTGRES_USER" -d {{ .Values.database.names.testing | quote }} -tAc "SELECT 1" | grep -q 1
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      {{- if or $certManagerEnabled $existingSecretName }}
+      volumes:
+        - name: tls-secret
+          secret:
+            secretName: {{ ternary .Values.ssl.certManager.secretName .Values.ssl.existingSecretName $certManagerEnabled }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - {{ .Values.persistence.accessMode }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}
