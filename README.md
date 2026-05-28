@@ -116,23 +116,27 @@ Pre-built images for the sample applications are published to Docker Hub under t
 |-----------|--------------------------------------|-----------------------------------|
 | Backend   | `synthesizedio/bank-demo-backend`    | `latest`, `<short-commit-sha>`    |
 | Frontend  | `synthesizedio/bank-demo-frontend`   | `latest`, `<short-commit-sha>`    |
+| Database  | `synthesizedio/bank-demo-database`   | `latest`, `<short-commit-sha>`    |
 
 Pull the images:
 
 ```bash
 docker pull synthesizedio/bank-demo-backend:latest
 docker pull synthesizedio/bank-demo-frontend:latest
+docker pull synthesizedio/bank-demo-database:latest
 ```
 
 To pin to a specific build, use the 7-character commit SHA tag (e.g. `synthesizedio/bank-demo-backend:abc1234`).
 
-Both images are built for `linux/amd64` and `linux/arm64`.
+All images are built for `linux/amd64` and `linux/arm64`.
+
+The database image starts from `postgres:15-alpine` and packages the Bank demo initialization scripts. On first startup it creates the existing Bank demo databases: `bank_seed`, `bank_prod`, and `bank_testing`.
 
 ### Release Process
 
 Images are built and published automatically by [`.github/workflows/ci.yml`](.github/workflows/ci.yml) on every push to `main`. The workflow:
 
-1. Builds multi-arch (`linux/amd64`, `linux/arm64`) images from the `Dockerfile` in each component directory (`bank_app/backend`, `bank_app/frontend`).
+1. Builds multi-arch (`linux/amd64`, `linux/arm64`) images from the `Dockerfile` in each component directory (`bank_app/backend`, `bank_app/frontend`, `bank_app/database`).
 2. Tags each image with the short commit SHA (immutable, one per build) and moves `latest`.
 3. Pushes both images to Docker Hub using the `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` repository secrets.
 
