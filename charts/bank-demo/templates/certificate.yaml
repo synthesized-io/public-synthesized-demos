@@ -1,0 +1,15 @@
+{{- if and .Values.ssl.enabled .Values.ssl.certManager.enabled .Values.dbExposure.enabled .Values.external.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "bank-demo.fullname" . }}-tls
+  labels:
+    {{- include "bank-demo.labels" . | nindent 4 }}
+spec:
+  secretName: {{ required "ssl.certManager.secretName is required when ssl.certManager.enabled=true" .Values.ssl.certManager.secretName }}
+  dnsNames:
+    - {{ include "bank-demo.externalHost" . }}
+  issuerRef:
+    name: {{ required "ssl.certManager.issuerRef.name is required when ssl.certManager.enabled=true" .Values.ssl.certManager.issuerRef.name }}
+    kind: {{ default "ClusterIssuer" .Values.ssl.certManager.issuerRef.kind }}
+{{- end }}

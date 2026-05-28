@@ -1,0 +1,21 @@
+{{- if and .Values.dbExposure.enabled .Values.external.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "bank-demo.fullname" . }}-external
+  labels:
+    {{- include "bank-demo.labels" . | nindent 4 }}
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: "{{ include "bank-demo.externalHost" . }}"
+    {{- with .Values.dbExposure.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: LoadBalancer
+  ports:
+    - port: {{ .Values.dbExposure.port }}
+      targetPort: {{ .Values.service.port }}
+      protocol: TCP
+  selector:
+    {{- include "bank-demo.selectorLabels" . | nindent 4 }}
+{{- end }}
