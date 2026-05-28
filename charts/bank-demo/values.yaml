@@ -52,7 +52,7 @@ dbExposure:
     service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
 
 ssl:
-  enabled: true
+  enabled: false
   existingSecretName: ""
   certManager:
     enabled: false
