@@ -26,6 +26,7 @@ fullnameOverride: ""
 
 database:
   bootstrapName: postgres
+  sslMode: ""
   usernameKey: username
   passwordKey: password
   secretName: bank-database-credentials

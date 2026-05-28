@@ -33,3 +33,15 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- include "bank-demo.fullname" . -}}
 {{- end -}}
 {{- end }}
+
+{{- define "bank-demo.sslMode" -}}
+{{- if .Values.database.sslMode -}}
+{{- .Values.database.sslMode -}}
+{{- else -}}
+{{- if .Values.ssl.enabled -}}
+require
+{{- else -}}
+disable
+{{- end -}}
+{{- end }}
+{{- end }}
