@@ -15,7 +15,7 @@ sslInitResources:
     memory: 128Mi
 
 image:
-  repository: synthesizedio/bank-demo-database
+  repository: 340706125493.dkr.ecr.eu-west-2.amazonaws.com/bank-demo-database
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -71,7 +71,7 @@ backend:
   name: bank-backend
   replicaCount: 1
   image:
-    repository: synthesizedio/bank-demo-backend
+    repository: 340706125493.dkr.ecr.eu-west-2.amazonaws.com/bank-demo-backend
     tag: latest
     pullPolicy: IfNotPresent
   resources:
@@ -100,7 +100,7 @@ frontend:
   name: bank-frontend
   replicaCount: 1
   image:
-    repository: synthesizedio/bank-demo-frontend
+    repository: 340706125493.dkr.ecr.eu-west-2.amazonaws.com/bank-demo-frontend
     tag: latest
     pullPolicy: IfNotPresent
   resources:
