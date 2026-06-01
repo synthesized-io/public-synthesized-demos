@@ -108,25 +108,28 @@ Configuration files can be found at `bank_app/synthesized/yaml`.
 
 ## Docker Images
 
-Pre-built images for the sample applications are published to Docker Hub under the [`synthesizedio`](https://hub.docker.com/u/synthesizedio) namespace. They can be pulled directly without cloning the repository or running `docker compose build`.
+Pre-built images for the sample applications are published to the shared AWS ECR registry. They can be pulled directly without cloning the repository or running `docker compose build` after authenticating to ECR.
 
 ### Sample Bank App Images
 
-| Component | Image                                | Tags                              |
-|-----------|--------------------------------------|-----------------------------------|
-| Backend   | `synthesizedio/bank-demo-backend`    | `latest`, `<short-commit-sha>`    |
-| Frontend  | `synthesizedio/bank-demo-frontend`   | `latest`, `<short-commit-sha>`    |
-| Database  | `synthesizedio/bank-demo-database`   | `latest`, `<short-commit-sha>`    |
+| Component | Image                                                                 | Tags                           |
+|-----------|-----------------------------------------------------------------------|--------------------------------|
+| Backend   | `340706125493.dkr.ecr.eu-west-2.amazonaws.com/bank-demo-backend`      | `latest`, `<short-commit-sha>` |
+| Frontend  | `340706125493.dkr.ecr.eu-west-2.amazonaws.com/bank-demo-frontend`     | `latest`, `<short-commit-sha>` |
+| Database  | `340706125493.dkr.ecr.eu-west-2.amazonaws.com/bank-demo-database`     | `latest`, `<short-commit-sha>` |
 
 Pull the images:
 
 ```bash
-docker pull synthesizedio/bank-demo-backend:latest
-docker pull synthesizedio/bank-demo-frontend:latest
-docker pull synthesizedio/bank-demo-database:latest
+aws ecr get-login-password --region eu-west-2 \
+  | docker login --username AWS --password-stdin 340706125493.dkr.ecr.eu-west-2.amazonaws.com
+
+docker pull 340706125493.dkr.ecr.eu-west-2.amazonaws.com/bank-demo-backend:latest
+docker pull 340706125493.dkr.ecr.eu-west-2.amazonaws.com/bank-demo-frontend:latest
+docker pull 340706125493.dkr.ecr.eu-west-2.amazonaws.com/bank-demo-database:latest
 ```
 
-To pin to a specific build, use the 7-character commit SHA tag (e.g. `synthesizedio/bank-demo-backend:abc1234`).
+To pin to a specific build, use the 7-character commit SHA tag (e.g. `340706125493.dkr.ecr.eu-west-2.amazonaws.com/bank-demo-backend:abc1234`).
 
 All images are built for `linux/amd64` and `linux/arm64`.
 
@@ -140,7 +143,7 @@ Images are built and published automatically by [`.github/workflows/ci.yml`](.gi
 
 1. Builds multi-arch (`linux/amd64`, `linux/arm64`) images from the `Dockerfile` in each component directory (`bank_app/backend`, `bank_app/frontend`, `bank_app/database`).
 2. Tags each image with the short commit SHA (immutable, one per build) and moves `latest`.
-3. Pushes both images to Docker Hub using the `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` repository secrets.
+3. Pushes the images to shared ECR using GitHub OIDC and the `GH_OIDC_ECR_ROLE_ARN` repository secret.
 
 Merging to `main` is the release. No manual version bump required.
 
