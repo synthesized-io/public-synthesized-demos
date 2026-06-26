@@ -23,28 +23,28 @@ VALUES
   ('Tina', 'Lewis', 'tina.lewis@example.com', '+447908806019', 'Nonprofit');
 
 -- Insert Accounts
-INSERT INTO bank.accounts (customer_id, account_type, status, opened_date, balance)
-VALUES 
-  (1, 'Checking', 'Active', '2023-01-01', 1500.00),
-  (2, 'Savings', 'Active', '2023-02-01', 8200.00),
-  (3, 'Credit', 'Frozen', '2023-03-01', -3000.00),
-  (4, 'Loan', 'Active', '2023-04-01', -15000.00),
-  (5, 'Investment', 'Frozen', '2023-05-01', 1200000.00),
-  (6, 'Checking', 'Overdrawn', '2023-06-01', -500.00),
-  (7, 'Savings', 'Active', '2023-07-01', 7200.00),
-  (8, 'Credit', 'Active', '2023-08-01', 0.00),
-  (9, 'Loan', 'Active', '2023-09-01', -45000.00),
-  (10, 'Investment', 'Active', '2023-10-01', 250000.00),
-  (11, 'Checking', 'Active', '2023-11-01', 950.00),
-  (12, 'Savings', 'Frozen', '2023-12-01', 10200.00),
-  (13, 'Credit', 'Active', '2024-01-01', -1800.00),
-  (14, 'Loan', 'Active', '2024-02-01', -22000.00),
-  (15, 'Investment', 'Active', '2024-03-01', 0.00),
-  (16, 'Checking', 'Frozen', '2024-04-01', 10500.00),
-  (17, 'Savings', 'Overdrawn', '2024-05-01', -250.00),
-  (18, 'Credit', 'Active', '2024-06-01', -800.00),
-  (19, 'Loan', 'Frozen', '2024-07-01', -13000.00),
-  (20, 'Investment', 'Active', '2024-08-01', 600000.00);
+INSERT INTO bank.accounts (customer_id, account_type, status, opened_date, balance, credit_card_number, card_brand, card_exp_month, card_exp_year, cvv)
+VALUES
+  (1, 'Checking', 'Active', '2023-01-01', 1500.00, '4532015112830366', 'Visa', 7, 2027, '312'),
+  (2, 'Savings', 'Active', '2023-02-01', 8200.00, '5425233430109903', 'Mastercard', 11, 2026, '489'),
+  (3, 'Credit', 'Frozen', '2023-03-01', -3000.00, '374245455400126', 'Amex', 4, 2028, '1234'),
+  (4, 'Loan', 'Active', '2023-04-01', -15000.00, '6011000990139424', 'Discover', 9, 2029, '776'),
+  (5, 'Investment', 'Frozen', '2023-05-01', 1200000.00, '4916338506082832', 'Visa', 2, 2027, '145'),
+  (6, 'Checking', 'Overdrawn', '2023-06-01', -500.00, '5500005555555559', 'Mastercard', 6, 2030, '902'),
+  (7, 'Savings', 'Active', '2023-07-01', 7200.00, '340000000000009', 'Amex', 1, 2026, '5678'),
+  (8, 'Credit', 'Active', '2023-08-01', 0.00, '6011111111111117', 'Discover', 12, 2028, '334'),
+  (9, 'Loan', 'Active', '2023-09-01', -45000.00, '4024007103939509', 'Visa', 3, 2031, '671'),
+  (10, 'Investment', 'Active', '2023-10-01', 250000.00, '5105105105105100', 'Mastercard', 8, 2027, '218'),
+  (11, 'Checking', 'Active', '2023-11-01', 950.00, '371449635398431', 'Amex', 5, 2029, '9021'),
+  (12, 'Savings', 'Frozen', '2023-12-01', 10200.00, '6011000000000004', 'Discover', 10, 2026, '540'),
+  (13, 'Credit', 'Active', '2024-01-01', -1800.00, '4485040371536584', 'Visa', 7, 2030, '883'),
+  (14, 'Loan', 'Active', '2024-02-01', -22000.00, '5294160000000006', 'Mastercard', 4, 2028, '127'),
+  (15, 'Investment', 'Active', '2024-03-01', 0.00, '378282246310005', 'Amex', 9, 2027, '3456'),
+  (16, 'Checking', 'Frozen', '2024-04-01', 10500.00, '6011981111111113', 'Discover', 11, 2031, '605'),
+  (17, 'Savings', 'Overdrawn', '2024-05-01', -250.00, '4716561666644057', 'Visa', 2, 2026, '470'),
+  (18, 'Credit', 'Active', '2024-06-01', -800.00, '5212345678901234', 'Mastercard', 6, 2029, '318'),
+  (19, 'Loan', 'Frozen', '2024-07-01', -13000.00, '348282246310002', 'Amex', 8, 2030, '7890'),
+  (20, 'Investment', 'Active', '2024-08-01', 600000.00, '6011223344556677', 'Discover', 3, 2028, '992');
 
 -- Insert Transactions
 INSERT INTO bank.transactions (account_id, transaction_type, transaction_date, amount, channel, currency)

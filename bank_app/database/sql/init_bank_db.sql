@@ -31,7 +31,12 @@ CREATE TABLE bank.accounts (
     account_type bank.account_type_enum NOT NULL,
     status bank.account_status_enum NOT NULL DEFAULT 'Active',
     opened_date DATE DEFAULT CURRENT_DATE,
-    balance NUMERIC(15, 2) NOT NULL
+    balance NUMERIC(15, 2) NOT NULL,
+    credit_card_number VARCHAR(19),  -- Sensitive (Finance generator / encrypted)
+    card_brand VARCHAR(20),          -- Categorical generator / preserve
+    card_exp_month SMALLINT,         -- Continuous generator / preserve
+    card_exp_year SMALLINT,          -- Continuous generator / preserve
+    cvv VARCHAR(4)                   -- Sensitive (encrypted)
 );
 
 -- Transactions Table
