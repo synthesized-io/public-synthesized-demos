@@ -1,7 +1,16 @@
 # Environment variables for easy port changes
-# BANK_BACKEND_PORT: Host port for backend (default 8085)
-# BANK_FRONTEND_PORT: Host port for frontend (default 3005)
-# BANK_DB_PORT: Host port for Postgres DB (default 5438)
+# Bank
+#   BANK_BACKEND_PORT: Host port for bank backend (default 8085)
+#   BANK_FRONTEND_PORT: Host port for bank frontend (default 3005)
+#   BANK_DB_PORT: Host port for bank Postgres DB (default 5438)
+# Insurance
+#   INSURANCE_BACKEND_PORT: Host port for insurance backend (default 8086)
+#   INSURANCE_FRONTEND_PORT: Host port for insurance frontend (default 3008)
+#   INSURANCE_DB_PORT: Host port for insurance Postgres DB (default 5439)
+# Healthcare
+#   HEALTHCARE_BACKEND_PORT: Host port for healthcare backend (default 8087)
+#   HEALTHCARE_FRONTEND_PORT: Host port for healthcare frontend (default 3007)
+#   HEALTHCARE_DB_PORT: Host port for healthcare Postgres DB (default 5440)
 
 services:
   # PostgreSQL Database for Bank App
@@ -88,10 +97,192 @@ services:
     networks:
       - bank-network
 
+  # =====================================================================
+  # Insurance Application
+  # =====================================================================
+
+  # PostgreSQL Database for Insurance App
+  insurance-postgres:
+    image: postgres:15-alpine
+    container_name: insurance-postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: apiuser
+      POSTGRES_PASSWORD: apipassword
+    ports:
+      - "${INSURANCE_DB_PORT:-5439}:5432"
+    volumes:
+      - insurance_postgres_data:/var/lib/postgresql/data
+      - ./insurance_app/database/init:/docker-entrypoint-initdb.d
+      - ./insurance_app/database/sql:/docker-entrypoint-initdb.d/sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apiuser -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - insurance-network
+
+  # Insurance Backend
+  insurance-backend:
+    build:
+      context: ./insurance_app/backend
+      dockerfile: Dockerfile
+    container_name: insurance-backend
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://insurance-postgres:5432/insurance_testing
+      - SPRING_DATASOURCE_USERNAME=apiuser
+      - SPRING_DATASOURCE_PASSWORD=apipassword
+      - SPRING_DATASOURCE_SEED_URL=jdbc:postgresql://insurance-postgres:5432/insurance_seed
+      - SPRING_DATASOURCE_SEED_USERNAME=apiuser
+      - SPRING_DATASOURCE_SEED_PASSWORD=apipassword
+      - SPRING_DATASOURCE_TESTING_URL=jdbc:postgresql://insurance-postgres:5432/insurance_testing
+      - SPRING_DATASOURCE_TESTING_USERNAME=apiuser
+      - SPRING_DATASOURCE_TESTING_PASSWORD=apipassword
+      - SPRING_DATASOURCE_PROD_URL=jdbc:postgresql://insurance-postgres:5432/insurance_prod
+      - SPRING_DATASOURCE_PROD_USERNAME=apiuser
+      - SPRING_DATASOURCE_PROD_PASSWORD=apipassword
+    ports:
+      - "${INSURANCE_BACKEND_PORT:-8086}:8080"
+    depends_on:
+      insurance-postgres:
+        condition: service_healthy
+    networks:
+      - insurance-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api-docs > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Insurance Frontend
+  insurance-frontend:
+    build:
+      context: ./insurance_app/frontend
+      dockerfile: Dockerfile
+    container_name: insurance-frontend
+    ports:
+      - "${INSURANCE_FRONTEND_PORT:-3008}:80"
+    depends_on:
+      insurance-backend:
+        condition: service_healthy
+    networks:
+      - insurance-network
+
+  # Insurance orchestrator shortcut
+  insurance:
+    image: alpine:latest
+    command: sh -c "echo 'Insurance application started - check logs from individual services' && tail -f /dev/null"
+    depends_on:
+      insurance-postgres:
+        condition: service_healthy
+      insurance-backend:
+        condition: service_healthy
+      insurance-frontend:
+        condition: service_started
+    networks:
+      - insurance-network
+
+  # =====================================================================
+  # Healthcare Application
+  # =====================================================================
+
+  # PostgreSQL Database for Healthcare App
+  healthcare-postgres:
+    image: postgres:15-alpine
+    container_name: healthcare-postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: apiuser
+      POSTGRES_PASSWORD: apipassword
+    ports:
+      - "${HEALTHCARE_DB_PORT:-5440}:5432"
+    volumes:
+      - healthcare_postgres_data:/var/lib/postgresql/data
+      - ./healthcare_app/database/init:/docker-entrypoint-initdb.d
+      - ./healthcare_app/database/sql:/docker-entrypoint-initdb.d/sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apiuser -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - healthcare-network
+
+  # Healthcare Backend
+  healthcare-backend:
+    build:
+      context: ./healthcare_app/backend
+      dockerfile: Dockerfile
+    container_name: healthcare-backend
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://healthcare-postgres:5432/healthcare_testing
+      - SPRING_DATASOURCE_USERNAME=apiuser
+      - SPRING_DATASOURCE_PASSWORD=apipassword
+      - SPRING_DATASOURCE_SEED_URL=jdbc:postgresql://healthcare-postgres:5432/healthcare_seed
+      - SPRING_DATASOURCE_SEED_USERNAME=apiuser
+      - SPRING_DATASOURCE_SEED_PASSWORD=apipassword
+      - SPRING_DATASOURCE_TESTING_URL=jdbc:postgresql://healthcare-postgres:5432/healthcare_testing
+      - SPRING_DATASOURCE_TESTING_USERNAME=apiuser
+      - SPRING_DATASOURCE_TESTING_PASSWORD=apipassword
+      - SPRING_DATASOURCE_PROD_URL=jdbc:postgresql://healthcare-postgres:5432/healthcare_prod
+      - SPRING_DATASOURCE_PROD_USERNAME=apiuser
+      - SPRING_DATASOURCE_PROD_PASSWORD=apipassword
+    ports:
+      - "${HEALTHCARE_BACKEND_PORT:-8087}:8080"
+    depends_on:
+      healthcare-postgres:
+        condition: service_healthy
+    networks:
+      - healthcare-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api-docs > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Healthcare Frontend
+  healthcare-frontend:
+    build:
+      context: ./healthcare_app/frontend
+      dockerfile: Dockerfile
+    container_name: healthcare-frontend
+    ports:
+      - "${HEALTHCARE_FRONTEND_PORT:-3007}:80"
+    depends_on:
+      healthcare-backend:
+        condition: service_healthy
+    networks:
+      - healthcare-network
+
+  # Healthcare orchestrator shortcut
+  healthcare:
+    image: alpine:latest
+    command: sh -c "echo 'Healthcare application started - check logs from individual services' && tail -f /dev/null"
+    depends_on:
+      healthcare-postgres:
+        condition: service_healthy
+      healthcare-backend:
+        condition: service_healthy
+      healthcare-frontend:
+        condition: service_started
+    networks:
+      - healthcare-network
+
 volumes:
   bank_postgres_data:
+    driver: local
+  insurance_postgres_data:
+    driver: local
+  healthcare_postgres_data:
     driver: local
 
 networks:
   bank-network:
+    driver: bridge
+  insurance-network:
+    driver: bridge
+  healthcare-network:
     driver: bridge

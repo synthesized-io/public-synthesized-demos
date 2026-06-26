@@ -1,0 +1,72 @@
+default_config:
+  mode: "GENERATION"
+  target_ratio: 5.0
+  use_working_directory: true
+  locale: "en-GB"
+cycle_resolution_strategy: "FAIL"
+schema_creation_mode: "CREATE_IF_NOT_EXISTS"
+table_truncation_mode: "TRUNCATE"
+safety_mode: "RELAXED"
+use_text_column_heuristics: true
+tables:
+  - table_name_with_schema: healthcare.appointments
+    transformations:
+      - columns:
+          - appointment_status
+          - appointment_date
+        params:
+          type: scripting_transformer
+          language: "JAVASCRIPT"
+          script:
+            code: |
+              (ctx) => {
+                const ChronoUnit = Java.type('java.time.temporal.ChronoUnit');
+
+                // Define status weights
+                const statuses = [
+                  { name: 'Scheduled', weight: 0.25 },
+                  { name: 'Confirmed', weight: 0.20 },
+                  { name: 'InProgress', weight: 0.05 },
+                  { name: 'Completed', weight: 0.40 },
+                  { name: 'Cancelled', weight: 0.07 },
+                  { name: 'NoShow', weight: 0.03 }
+                ];
+
+                // Weighted random status selection
+                const rand = Math.random();
+                let cumulative = 0;
+                let selectedStatus = statuses[0].name;
+
+                for (let i = 0; i < statuses.length; i++) {
+                  cumulative += statuses[i].weight;
+                  if (rand <= cumulative) {
+                    selectedStatus = statuses[i].name;
+                    break;
+                  }
+                }
+
+                // Generate date based on status
+                const now = JavaLocalDateTime.now();
+                let appointmentDate;
+
+                if (selectedStatus === 'Completed' || selectedStatus === 'Cancelled' || selectedStatus === 'NoShow') {
+                  // Past appointments: 1-365 days ago
+                  const daysAgo = Math.floor(Math.random() * 365) + 1;
+                  appointmentDate = now.minusDays(daysAgo);
+
+                } else if (selectedStatus === 'Scheduled' || selectedStatus === 'Confirmed') {
+                  // Future appointments: 1-180 days from now
+                  const daysAhead = Math.floor(Math.random() * 180) + 1;
+                  appointmentDate = now.plusDays(daysAhead);
+
+                } else if (selectedStatus === 'InProgress') {
+                  // InProgress: today or within last 24 hours
+                  const hoursOffset = Math.floor(Math.random() * 24);
+                  appointmentDate = now.minusHours(hoursOffset);
+                }
+
+                return {
+                  appointment_status: selectedStatus,
+                  appointment_date: appointmentDate
+                };
+              }

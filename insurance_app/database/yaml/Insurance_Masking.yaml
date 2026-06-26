@@ -1,0 +1,65 @@
+default_config:
+  use_working_directory: true
+  locale: en-GB
+  target_ratio: 1.0
+
+tables:
+  - table_name_with_schema: insurance.policyholders
+    transformations:
+      - columns:
+          - first_name
+          - last_name
+          - email
+          - phone
+        mode: MASKING
+        params:
+          type: person_generator
+          column_templates:
+            - "${first_name}"
+            - "${last_name}"
+            - "${email}"
+            - "${phone_national}"
+      - columns:
+          - date_of_birth
+        mode: MASKING
+        params:
+          type: date_generator
+          mean: "1980-10-30T21:36:00Z"
+          std: "PT78342H27M50.790S"
+          min: "1961-10-20T00:00:00Z"
+          max: "1997-05-03T00:00:00Z"
+  - table_name_with_schema: insurance.agents
+    transformations:
+      - columns:
+          - first_name
+          - last_name
+          - email
+          - phone
+        mode: MASKING
+        params:
+          type: person_generator
+          column_templates:
+            - "${first_name}"
+            - "${last_name}"
+            - "${email}"
+            - "${phone_national}"
+      - columns:
+          - license_number
+        mode: MASKING
+        params:
+          type: unique_generator
+          transformations:
+            - columns:
+                - license_number
+              params:
+                type: string_sequence_generator
+                length: 50
+                alphabets:
+                  - type: upper_letters
+                  - type: digits
+
+cycle_resolution_strategy: FAIL
+schema_creation_mode: DROP_AND_CREATE
+table_truncation_mode: TRUNCATE
+safety_mode: STRICT
+use_text_column_heuristics: true

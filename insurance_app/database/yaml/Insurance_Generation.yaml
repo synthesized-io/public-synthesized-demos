@@ -1,0 +1,42 @@
+default_config:
+  mode: GENERATION
+  locale: en-GB
+  target_ratio: 5
+  use_working_directory: true
+use_text_column_heuristics: true
+
+tables:
+  # Let heuristics populate policyholders; just say how many you want.
+  - table_name_with_schema: insurance.policyholders
+
+  - table_name_with_schema: insurance.policies
+    target_row_number: 500
+    transformations:
+      - columns: [ policyholder_id ]
+        params:
+          type: foreign_key_generator
+          distribution: ROUND_ROBIN
+      - columns: [ status ]
+        params:
+          type: categorical_generator
+          categories:
+            value_source: PROVIDED
+            values:
+              InForce:   0.65
+              Expired:   0.10
+              Bound:     0.10
+              Withdrawn: 0.05
+              Draft:     0.05
+              Cancelled: 0.05
+
+  - table_name_with_schema: insurance.claims
+    transformations:
+      - columns: [ policy_id ]
+        params:
+          type: foreign_key_generator
+          distribution: ROUND_ROBIN
+
+cycle_resolution_strategy: FAIL
+schema_creation_mode: CREATE_IF_NOT_EXISTS
+table_truncation_mode: TRUNCATE
+safety_mode: RELAXED
