@@ -1,0 +1,65 @@
+default_config:
+  use_working_directory: true
+  locale: en-GB
+  target_ratio: 1
+
+tables:
+  - table_name_with_schema: "healthcare.providers"
+    transformations:
+      - columns:
+          - "first_name"
+        id: "pii-healthcare-providers-first_name"
+        mode: "MASKING"
+      - columns:
+          - "last_name"
+        id: "pii-healthcare-providers-last_name"
+        mode: "MASKING"
+      - columns:
+          - "email"
+        id: "pii-healthcare-providers-email"
+        mode: "MASKING"
+      - columns:
+          - "phone"
+        id: "pii-healthcare-providers-phone"
+        mode: "MASKING"
+      - columns:
+          - "license_number"
+        id: "pii-healthcare-providers-license_number"
+        mode: "MASKING"
+  - table_name_with_schema: "healthcare.patients"
+    transformations:
+      - columns:
+          - "first_name"
+        id: "pii-healthcare-patients-first_name"
+        mode: "MASKING"
+      - columns:
+          - "last_name"
+        id: "pii-healthcare-patients-last_name"
+        mode: "MASKING"
+      - columns:
+          - "email"
+        id: "pii-healthcare-patients-email"
+        mode: "MASKING"
+      - columns:
+          - "phone"
+        id: "pii-healthcare-patients-phone"
+        mode: "MASKING"
+      - columns:
+          - "date_of_birth"
+        id: "pii-healthcare-patients-date_of_birth"
+        mode: "MASKING"
+  - table_name_with_schema: "healthcare.prescriptions"
+    transformations:
+      - columns:
+          - "refills_remaining"
+        id: "pii-healthcare-prescriptions-refills_remaining"
+        mode: "MASKING"
+      - columns:
+          - "pharmacy_name"
+        id: "pii-healthcare-prescriptions-pharmacy_name"
+        mode: "MASKING"
+cycle_resolution_strategy: "FAIL"
+schema_creation_mode: DROP_AND_CREATE
+table_truncation_mode: "TRUNCATE"
+safety_mode: "RELAXED"
+use_text_column_heuristics: true

@@ -1,0 +1,227 @@
+default_config:
+  use_working_directory: true
+  locale: en-GB
+  mode: GENERATION
+global_seed: 42
+
+tables:
+  - table_name_with_schema: healthcare.appointments
+    target_row_number: 15000
+    transformations:
+      - columns:
+          - department
+        params:
+          type: categorical_generator
+          categories:
+            value_source: PROVIDED
+            values:
+              Cardiology: 0.15
+              Neurology: 0.12
+              Pediatrics: 0.18
+              Orthopedics: 0.15
+              Dermatology: 0.10
+              Emergency: 0.10
+              GeneralPractice: 0.20
+      - columns:
+          - duration_minutes
+        params:
+          type: conditional_generator
+          conditional_column: appointment_type
+          conditional_value: Surgery
+          if_true:
+            type: continuous_generator
+            min: 60
+            mean: 150
+            max: 360
+            std: 60
+            numeric_type: INT
+          if_false:
+            type: conditional_generator
+            conditional_column: appointment_type
+            conditional_value: Emergency
+            if_true:
+              type: continuous_generator
+              min: 30
+              mean: 90
+              max: 240
+              std: 45
+              numeric_type: INT
+            if_false:
+              type: conditional_generator
+              conditional_column: appointment_type
+              conditional_value: Consultation
+              if_true:
+                type: continuous_generator
+                min: 30
+                mean: 45
+                max: 90
+                std: 15
+                numeric_type: INT
+              if_false:
+                type: conditional_generator
+                conditional_column: appointment_type
+                conditional_value: Vaccination
+                if_true:
+                  type: continuous_generator
+                  min: 10
+                  mean: 15
+                  max: 20
+                  std: 3
+                  numeric_type: INT
+                if_false:
+                  type: continuous_generator
+                  min: 20
+                  mean: 30
+                  max: 60
+                  std: 10
+                  numeric_type: INT
+
+  - table_name_with_schema: healthcare.providers
+    mode: KEEP
+    target_ratio: 1
+
+  - table_name_with_schema: healthcare.patients
+    target_row_number: 10000
+    transformations:
+      - columns:
+          - patient_type
+        params:
+          type: categorical_generator
+          categories:
+            value_source: PROVIDED
+            values:
+              Adult: 0.55
+              Pediatric: 0.15
+              Geriatric: 0.20
+              Prenatal: 0.05
+              Emergency: 0.05
+
+      - columns:
+          - blood_type
+        params:
+          type: categorical_generator
+          categories:
+            value_source: PROVIDED
+            values:
+              O+: 0.38
+              A+: 0.34
+              B+: 0.09
+              AB+: 0.03
+              O-: 0.07
+              A-: 0.06
+              B-: 0.02
+              AB-: 0.01
+
+  - table_name_with_schema: healthcare.prescriptions
+    target_row_number: 5000
+    transformations:
+      - columns:
+          - prescription_status
+        params:
+          type: categorical_generator
+          categories:
+            value_source: PROVIDED
+            values:
+              Active: 0.60
+              Completed: 0.30
+              Cancelled: 0.05
+              Expired: 0.05
+
+      - columns:
+          - medication_name
+        params:
+          type: categorical_generator
+          categories:
+            value_source: PROVIDED
+            values:
+              Amoxicillin: 0.05
+              Amlodipine: 0.05
+              Aspirin: 0.10
+              Atorvastatin: 0.05
+              Donepezil: 0.05
+              Doxycycline: 0.05
+              Epinephrine Auto-Injector: 0.05
+              Ibuprofen: 0.05
+              Levothyroxine: 0.05
+              Lisinopril: 0.05
+              Memantine: 0.05
+              Metformin: 0.05
+              Naproxen: 0.05
+              Nitroglycerin: 0.05
+              Omega-3 Fish Oil: 0.05
+              Prednisone: 0.05
+              Simvastatin: 0.05
+              Tretinoin Cream: 0.05
+              Vitamin D3: 0.05
+
+      - columns:
+          - dosage
+        params:
+          type: categorical_generator
+          categories:
+            value_source: PROVIDED
+            values:
+              0.025%: 0.05
+              0.3mg: 0.05
+              0.4mg: 0.05
+              10mg: 0.10
+              1000mg: 0.05
+              100mg: 0.05
+              20mg: 0.10
+              2000 IU: 0.05
+              250mg: 0.05
+              40mg: 0.05
+              400mg: 0.05
+              5mg: 0.10
+              500mg: 0.10
+              75mcg: 0.05
+              81mg: 0.10
+
+      - columns:
+          - refills_remaining
+        params:
+          type: conditional_generator
+          conditional_column: prescription_status
+          conditional_value: Completed
+          if_true:
+            type: categorical_generator
+            categories:
+              value_source: PROVIDED
+              values:
+                0: 1.0
+          if_false:
+            type: conditional_generator
+            conditional_column: prescription_status
+            conditional_value: Expired
+            if_true:
+              type: categorical_generator
+              categories:
+                value_source: PROVIDED
+                values:
+                  0: 1.0
+            if_false:
+              type: conditional_generator
+              conditional_column: prescription_status
+              conditional_value: Cancelled
+              if_true:
+                type: continuous_generator
+                min: 0
+                max: 2
+                mean: 1
+                std: 1
+                numeric_type: INT
+              if_false:
+                type: continuous_generator
+                min: 0
+                max: 6
+                mean: 3
+                std: 2
+                numeric_type: INT
+
+
+
+cycle_resolution_strategy: "FAIL"
+schema_creation_mode: DROP_AND_CREATE
+table_truncation_mode: TRUNCATE
+safety_mode: "RELAXED"
+use_text_column_heuristics: true

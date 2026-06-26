@@ -1,0 +1,11 @@
+default_config:
+  mode: "GENERATION"
+  target_ratio: 5.0
+  use_working_directory: true
+  locale: "en-GB"
+
+cycle_resolution_strategy: "FAIL"
+schema_creation_mode: "CREATE_IF_NOT_EXISTS"
+table_truncation_mode: "TRUNCATE"
+safety_mode: "RELAXED"
+use_text_column_heuristics: true

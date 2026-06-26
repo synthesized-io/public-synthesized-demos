@@ -13,6 +13,16 @@ Each application follows the same pattern:
 3. Example Synthesized config scripts to generate and mask the data
 4. A script to setup the workflows for a demo user within Synthesized's TDK Governor
 
+The repository currently includes three applications:
+
+| Application | Data Model | Domain |
+|-------------|------------|--------|
+| **Bank** | Customers → Accounts → Transactions (with Branches) | Retail banking |
+| **Insurance** | Policyholders → Policies → Claims (with Agents) | Insurance |
+| **Healthcare** | Patients → Appointments → Prescriptions (with Providers) | Healthcare |
+
+The Insurance and Healthcare applications also demonstrate **cross-system referential integrity** (see [Cross-System Integration](#cross-system-integration)).
+
 ## Prerequisites
 
 1. Docker and Docker Compose
@@ -105,6 +115,82 @@ Configuration files can be found at `bank_app/synthesized/yaml`.
 | generate_mode.yaml     | Prod   | Testing | A generation workflow showing how production data and configuration can be used to populate a test environment      |
 | auto_masking_mode.yaml | Prod   | Testing | A masking workflow showing how the PII scanner can be used to automatically configure a masking workflow            |
 | masking_mode.yaml      | Prod   | Testing | A masking workflow that has been configured to replace sensitive data with realistic values instead of scrubbing it |
+
+### Insurance App
+
+```bash
+docker compose up insurance
+```
+
+**Data Model**: Policyholders → Policies → Claims (with Agents)
+
+#### Insurance Default URLs:
+1. Frontend: http://localhost:3008
+2. Backend: http://localhost:8086
+3. Api docs: http://localhost:8086/api-docs (also accessible via http://localhost:3008/api-docs)
+
+#### Insurance Services:
+| Service            | Description          | Default Port | Environment Variable to Change Port |
+|--------------------|----------------------|--------------|-------------------------------------|
+| insurance-postgres | PostgreSQL database  | 5439         | INSURANCE_DB_PORT                   |
+| insurance-backend  | Spring Boot backend  | 8086         | INSURANCE_BACKEND_PORT              |
+| insurance-frontend | React frontend       | 3008         | INSURANCE_FRONTEND_PORT             |
+| insurance          | Main orchestrator    | N/A          | N/A                                 |
+
+#### Changing Insurance Ports:
+```bash
+INSURANCE_BACKEND_PORT=8090 INSURANCE_FRONTEND_PORT=3010 INSURANCE_DB_PORT=5441 docker compose up insurance
+```
+
+#### Insurance Synthesized Configuration
+
+Configuration files can be found at `insurance_app/database/yaml`.
+
+### Healthcare App
+
+```bash
+docker compose up healthcare
+```
+
+**Data Model**: Patients → Appointments → Prescriptions (with Providers)
+
+#### Healthcare Default URLs:
+1. Frontend: http://localhost:3007
+2. Backend: http://localhost:8087
+3. Api docs: http://localhost:8087/api-docs (also accessible via http://localhost:3007/api-docs)
+
+#### Healthcare Services:
+| Service             | Description          | Default Port | Environment Variable to Change Port |
+|---------------------|----------------------|--------------|-------------------------------------|
+| healthcare-postgres | PostgreSQL database  | 5440         | HEALTHCARE_DB_PORT                  |
+| healthcare-backend  | Spring Boot backend  | 8087         | HEALTHCARE_BACKEND_PORT             |
+| healthcare-frontend | React frontend       | 3007         | HEALTHCARE_FRONTEND_PORT            |
+| healthcare          | Main orchestrator    | N/A          | N/A                                 |
+
+#### Changing Healthcare Ports:
+```bash
+HEALTHCARE_BACKEND_PORT=8090 HEALTHCARE_FRONTEND_PORT=3010 HEALTHCARE_DB_PORT=5441 docker compose up healthcare
+```
+
+#### Healthcare Synthesized Configuration
+
+Configuration files can be found at `healthcare_app/database/yaml`.
+
+## Cross-System Integration
+
+The Insurance and Healthcare applications demonstrate cross-system referential integrity:
+
+```bash
+# Run both applications together
+docker compose up insurance healthcare
+```
+
+- Healthcare patients can be linked to insurance policies via an `insurance_policy_id` field.
+- Both apps expose `/api/cross-system/*` endpoints for querying related data across systems, for example:
+  - Insurance → Healthcare: `http://localhost:8086/api/cross-system/policy/1/healthcare`
+  - Healthcare → Insurance: `http://localhost:8087/api/cross-system/patient/1/insurance`
+
+> **Note:** The cross-system endpoints resolve linked records using cross-schema SQL, which requires the insurance and healthcare schemas to be co-located in the same PostgreSQL instance. In the default `docker compose` deployment each application runs its own database, so these endpoints are intended for use with a shared Synthesized-populated database.
 
 ## Docker Images
 

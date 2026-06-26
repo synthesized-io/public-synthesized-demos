@@ -1,0 +1,227 @@
+default_config:
+  use_working_directory: true
+  locale: en-GB
+  mode: GENERATION
+global_seed: 42
+
+tables:
+  - table_name_with_schema: insurance.policies
+    target_row_number: 15000
+    transformations:
+      - columns:
+          - status
+        params:
+          type: categorical_generator
+          categories:
+            value_source: PROVIDED
+            values:
+              InForce: 0.70
+              Expired: 0.08
+              Bound: 0.12
+              Withdrawn: 0.01
+              Draft: 0.03
+              Cancelled: 0.06
+      - columns:
+          - policy_type
+        params:
+          type: categorical_generator
+          categories:
+            value_source: PROVIDED
+            values:
+              Auto: 0.35
+              Home: 0.28
+              Life: 0.18
+              Health: 0.15
+              Business: 0.04
+      - columns:
+          - payment_frequency
+        params:
+          type: categorical_generator
+          categories:
+            value_source: PROVIDED
+            values:
+              Monthly: 0.65
+              Quarterly: 0.18
+              SemiAnnually: 0.10
+              Annually: 0.07
+      - columns:
+          - coverage_level
+        params:
+          type: categorical_generator
+          categories:
+            value_source: PROVIDED
+            values:
+              Basic: 0.25
+              Standard: 0.45
+              Premium: 0.20
+              Comprehensive: 0.10
+  - table_name_with_schema: insurance.agents
+    mode: KEEP
+    target_ratio: 1
+  - table_name_with_schema: insurance.policyholders
+    target_row_number: 10000
+    transformations:
+      - columns:
+          - first_name
+          - last_name
+          - email
+          - phone
+        params:
+          type: person_generator
+          column_templates:
+            - "${first_name}"
+            - "${last_name}"
+            - "${email}"
+            - "${phone_national}"
+      - columns:
+          - policyholder_type
+        params:
+          type: categorical_generator
+          categories:
+            value_source: PROVIDED
+            values:
+              Individual: 0.45
+              Family: 0.30
+              Business: 0.12
+              Group: 0.08
+              Senior: 0.05
+  - table_name_with_schema: insurance.claims
+    target_row_number: 5000
+    transformations:
+      - columns:
+          - claim_type
+          - claim_status
+        params:
+          type: categorical_generator
+      - columns:
+          - claim_amount
+        params:
+          type: conditional_generator
+          conditional_column: claim_type
+          conditional_value: Medical
+          if_true:
+            type: continuous_generator
+            min: 1000.00
+            mean: 25000.00
+            max: 200000.00
+            std: 30000.00
+            numeric_type: DOUBLE
+          if_false:
+            type: conditional_generator
+            conditional_column: claim_type
+            conditional_value: Liability
+            if_true:
+              type: continuous_generator
+              min: 5000.00
+              mean: 50000.00
+              max: 500000.00
+              std: 75000.00
+              numeric_type: DOUBLE
+            if_false:
+              type: conditional_generator
+              conditional_column: claim_type
+              conditional_value: Damage
+              if_true:
+                type: continuous_generator
+                min: 1000.00
+                mean: 15000.00
+                max: 100000.00
+                std: 20000.00
+                numeric_type: DOUBLE
+              if_false:
+                type: conditional_generator
+                conditional_column: claim_type
+                conditional_value: Theft
+                if_true:
+                  type: continuous_generator
+                  min: 500.00
+                  mean: 5000.00
+                  max: 50000.00
+                  std: 10000.00
+                  numeric_type: DOUBLE
+                if_false:
+                  type: continuous_generator
+                  min: 2000.00
+                  mean: 10000.00
+                  max: 80000.00
+                  std: 15000.00
+                  numeric_type: DOUBLE
+      - columns:
+          - settlement_amount
+        params:
+          type: conditional_generator
+          conditional_column: claim_status
+          conditional_value: Denied
+          if_true:
+            type: null_generator
+          if_false:
+            type: conditional_generator
+            conditional_column: claim_status
+            conditional_value: Filed
+            if_true:
+              type: null_generator
+            if_false:
+              type: conditional_generator
+              conditional_column: claim_status
+              conditional_value: UnderReview
+              if_true:
+                type: null_generator
+              if_false:
+                type: conditional_generator
+                conditional_column: claim_type
+                conditional_value: Medical
+                if_true:
+                  type: continuous_generator
+                  min: 1000.00
+                  mean: 23000.00
+                  max: 200000.00
+                  std: 29000.00
+                  numeric_type: DOUBLE
+                if_false:
+                  type: conditional_generator
+                  conditional_column: claim_type
+                  conditional_value: Liability
+                  if_true:
+                    type: continuous_generator
+                    min: 4500.00
+                    mean: 46000.00
+                    max: 500000.00
+                    std: 73000.00
+                    numeric_type: DOUBLE
+                  if_false:
+                    type: conditional_generator
+                    conditional_column: claim_type
+                    conditional_value: Damage
+                    if_true:
+                      type: continuous_generator
+                      min: 900.00
+                      mean: 13800.00
+                      max: 100000.00
+                      std: 19500.00
+                      numeric_type: DOUBLE
+                    if_false:
+                      type: conditional_generator
+                      conditional_column: claim_type
+                      conditional_value: Theft
+                      if_true:
+                        type: continuous_generator
+                        min: 450.00
+                        mean: 4600.00
+                        max: 50000.00
+                        std: 9800.00
+                        numeric_type: DOUBLE
+                      if_false:
+                        type: continuous_generator
+                        min: 1800.00
+                        mean: 9200.00
+                        max: 80000.00
+                        std: 14500.00
+                        numeric_type: DOUBLE
+  - table_name_with_schema: insurance.policy_agents
+    target_row_number: 15000
+    transformations: []
+cycle_resolution_strategy: "FAIL"
+schema_creation_mode: DROP_AND_CREATE
+table_truncation_mode: TRUNCATE
+safety_mode: "RELAXED"
+use_text_column_heuristics: true

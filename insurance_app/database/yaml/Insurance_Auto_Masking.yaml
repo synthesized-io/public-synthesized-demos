@@ -1,0 +1,55 @@
+default_config:
+  use_working_directory: true
+  locale: en-GB
+  target_ratio: 1.0
+
+tables:
+  - table_name_with_schema: "insurance.agents"
+    transformations:
+      - columns:
+          - "first_name"
+        id: "pii-insurance-agents-first_name"
+        mode: "MASKING"
+      - columns:
+          - "last_name"
+        id: "pii-insurance-agents-last_name"
+        mode: "MASKING"
+      - columns:
+          - "email"
+        id: "pii-insurance-agents-email"
+        mode: "MASKING"
+      - columns:
+          - "phone"
+        id: "pii-insurance-agents-phone"
+        mode: "MASKING"
+      - columns:
+          - "license_number"
+        id: "pii-insurance-agents-license_number"
+        mode: "MASKING"
+  - table_name_with_schema: "insurance.policyholders"
+    transformations:
+      - columns:
+          - "first_name"
+        id: "pii-insurance-policyholders-first_name"
+        mode: "MASKING"
+      - columns:
+          - "last_name"
+        id: "pii-insurance-policyholders-last_name"
+        mode: "MASKING"
+      - columns:
+          - "email"
+        id: "pii-insurance-policyholders-email"
+        mode: "MASKING"
+      - columns:
+          - "phone"
+        id: "pii-insurance-policyholders-phone"
+        mode: "MASKING"
+      - columns:
+          - "date_of_birth"
+        id: "pii-insurance-policyholders-date_of_birth"
+        mode: "MASKING"
+cycle_resolution_strategy: "FAIL"
+schema_creation_mode: DROP_AND_CREATE
+table_truncation_mode: "TRUNCATE"
+safety_mode: "STRICT"
+use_text_column_heuristics: true
