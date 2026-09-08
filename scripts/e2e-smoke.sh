@@ -14,7 +14,9 @@
 #     reaches the database
 #
 # Usage:  ./scripts/e2e-smoke.sh
-# Needs:  Docker and the Docker Compose plugin. Nothing else.
+# Needs:  Docker with the Compose plugin, plus curl, python3 and bash.
+#         The script probes the services with curl, and it parses JSON and
+#         the Compose health output with python3.
 # Exit:   0 if every check passes, 1 if any check fails.
 #
 # Note: this script leaves the stack running so that you can look at it.

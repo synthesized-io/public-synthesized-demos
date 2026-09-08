@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { render, screen } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import axios from 'axios';
@@ -111,10 +112,11 @@ describe('REACT_APP_BACKEND_URL contract', () => {
   it('keeps the build-time define in vite.config.js', () => {
     // The Docker deploy depends on this block. A browser bundle has no
     // process.env, so the components get an undefined host without it.
-    const config = readFileSync(
-      resolve(import.meta.dirname, '..', 'vite.config.js'),
-      'utf8'
-    );
+    // Derive the directory from import.meta.url. import.meta.dirname works
+    // on Node 20.11 and later, but this form works everywhere and matches
+    // the sibling healthcare test.
+    const here = dirname(fileURLToPath(import.meta.url));
+    const config = readFileSync(resolve(here, '..', 'vite.config.js'), 'utf8');
 
     expect(config).toContain("'process.env.REACT_APP_BACKEND_URL'");
     expect(config).toContain(
