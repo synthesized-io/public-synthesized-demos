@@ -1,0 +1,17 @@
+# Never copy a host node_modules into the image. The Dockerfile runs `npm ci`
+# first, then `COPY . .`. Without this file a host node_modules overwrites the
+# one built inside the container. Vite ships platform-specific native binaries,
+# so a macOS or Windows tree then breaks the Linux build.
+node_modules
+
+# Build output is produced inside the image.
+build
+dist
+
+# Local-only files.
+.env
+.env.*
+.git
+.gitignore
+npm-debug.log*
+.DS_Store
