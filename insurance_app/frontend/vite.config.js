@@ -14,4 +14,14 @@ export default defineConfig({
   define: {
     'process.env.REACT_APP_BACKEND_URL': JSON.stringify(process.env.REACT_APP_BACKEND_URL || ''),
   },
+  // Vitest reads this file, so the tests get the `define` block above.
+  // Note that Vite applies a `process.env.*` define differently in Node: it
+  // writes the value into process.env instead of replacing the text. The
+  // value is the same, but a test reads it at run time.
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './src/setupTests.js',
+    css: false,
+  },
 })

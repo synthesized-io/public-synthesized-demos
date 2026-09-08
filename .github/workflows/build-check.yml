@@ -50,6 +50,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Test
+        run: npm run test
+
+      # This step fails the job on a high or critical advisory. The three
+      # frontends are at zero vulnerabilities on this branch. The step keeps
+      # them there, and it names the pull request that introduces a new one.
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+
       - name: Build
         run: npm run build
 

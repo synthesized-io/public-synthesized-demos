@@ -198,9 +198,12 @@ check_records "http://localhost:${BANK_FRONTEND_PORT}/api/branches?database=SEED
 check_records "http://localhost:${INSURANCE_FRONTEND_PORT}/api/policies?database=SEED"  "insurance /api/policies via frontend proxy"
 check_records "http://localhost:${HEALTHCARE_FRONTEND_PORT}/api/patients?database=SEED" "healthcare /api/patients via frontend proxy"
 
-# The TESTING database is what each application selects by default. Prove that
-# the route answers cleanly there too. Do not assert records: bank_testing is
-# intentionally empty.
+# Also prove that the route answers cleanly on TESTING. Do not assert records:
+# bank_testing holds the schema and no rows.
+#
+# Note: the three applications do not agree on a default database. Bank starts
+# on TESTING, healthcare on PROD, and insurance on SEED. See the useState call
+# in each src/context/DatabaseContext.jsx.
 check_code "http://localhost:${BANK_FRONTEND_PORT}/api/branches?database=TESTING"       200 "bank /api/branches on TESTING"
 check_code "http://localhost:${INSURANCE_FRONTEND_PORT}/api/policies?database=TESTING"  200 "insurance /api/policies on TESTING"
 check_code "http://localhost:${HEALTHCARE_FRONTEND_PORT}/api/patients?database=TESTING" 200 "healthcare /api/patients on TESTING"
