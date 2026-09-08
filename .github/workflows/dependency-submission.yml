@@ -1,0 +1,65 @@
+name: dependency-submission
+
+# Gradle reports its full transitive dependency set to the GitHub dependency
+# graph only when the repository submits it. Without this workflow, the three
+# Spring Boot backends stay invisible to Dependabot and to Dependabot alerts.
+#
+# The submission must run on the default branch. A run on a pull request branch
+# does not update the graph that the alerts read.
+
+on:
+  push:
+    branches:
+      - "main"
+  schedule:
+    # Every Monday at 05:30 UTC. This is before the Dependabot run at 06:00, so
+    # Dependabot sees a fresh graph.
+    - cron: "30 5 * * 1"
+  workflow_dispatch:
+
+# Least privilege. The default is no permission at all. Only the job below gets
+# a token scope, and only the one scope that the submission API needs.
+permissions: {}
+
+jobs:
+  submit:
+    name: Submit ${{ matrix.app }} backend
+    runs-on: ubuntu-latest
+
+    # The Dependency Submission API writes to the dependency graph. That write
+    # needs contents: write. The job needs no other permission.
+    permissions:
+      contents: write
+
+    strategy:
+      # One backend that fails must not stop the other two submissions.
+      fail-fast: false
+      matrix:
+        include:
+          - app: bank
+            path: bank_app/backend
+          - app: healthcare
+            path: healthcare_app/backend
+          - app: insurance
+            path: insurance_app/backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      # The action builds a job correlator from the workflow name, the job id
+      # and the matrix values. The matrix keys above make that correlator unique
+      # for each backend, so the three submissions do not overwrite each other.
+      - name: Submit dependency graph
+        uses: gradle/actions/dependency-submission@v6
+        with:
+          build-root-directory: ${{ matrix.path }}
+          # Submit the graph, but do not also keep it as a workflow artifact.
+          # The artifact costs storage and nothing in this repository reads it.
+          dependency-graph: "generate-and-submit"

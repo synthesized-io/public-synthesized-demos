@@ -1,0 +1,116 @@
+# Dependabot configuration for the demo applications.
+#
+# Why this file exists:
+# - Before this file, no ecosystem was declared in the repository. Only the
+#   organization-level security updates ran. No version updates ran.
+# - The three Spring Boot backends were invisible. The dependency graph held
+#   zero Maven and zero Gradle packages, so their CVEs were never reported.
+#
+# Why the updates are grouped:
+# - The npm applications hold more than 1300 packages. Ungrouped updates open
+#   one pull request for each package. That volume is not reviewable.
+# - Each group opens one pull request for each directory each week.
+# - Major updates stay in a separate group. A breaking major update then cannot
+#   block the minor and patch updates that carry the security fixes.
+#
+# Note: Gradle reports its full transitive dependency set to the dependency
+# graph only when the repository submits it. The workflow
+# .github/workflows/dependency-submission.yml does that submission.
+
+version: 2
+
+updates:
+  # React frontends. Each directory holds a package.json and a package-lock.json.
+  - package-ecosystem: "npm"
+    directories:
+      - "/bank_app/frontend"
+      - "/healthcare_app/frontend"
+      - "/insurance_app/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 10
+    groups:
+      npm-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      npm-major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+
+  # Spring Boot backends. Each directory holds a build.gradle and a Gradle wrapper.
+  - package-ecosystem: "gradle"
+    directories:
+      - "/bank_app/backend"
+      - "/healthcare_app/backend"
+      - "/insurance_app/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 10
+    groups:
+      gradle-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      gradle-major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+
+  # Base images. These are the seven directories that hold a Dockerfile.
+  # Only bank_app has a database Dockerfile. The other two apps do not.
+  - package-ecosystem: "docker"
+    directories:
+      - "/bank_app/frontend"
+      - "/bank_app/backend"
+      - "/bank_app/database"
+      - "/healthcare_app/frontend"
+      - "/healthcare_app/backend"
+      - "/insurance_app/frontend"
+      - "/insurance_app/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 10
+    groups:
+      docker-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      docker-major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+
+  # Workflow actions. All workflows are in the /.github/workflows directory,
+  # so the directory for this ecosystem is the repository root.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"
