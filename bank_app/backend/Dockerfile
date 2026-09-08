@@ -1,5 +1,8 @@
 # Multi-stage Docker build for Spring Boot application
-FROM gradle:8.5-jdk17 AS build
+# Build stage: a plain JDK image. The Gradle wrapper (gradlew) downloads the
+# Gradle version that gradle/wrapper/gradle-wrapper.properties gives. A gradle:
+# image would add a second Gradle distribution that the build does not use.
+FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
 
 # Copy Gradle wrapper and build files
