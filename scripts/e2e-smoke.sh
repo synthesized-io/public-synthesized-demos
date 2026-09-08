@@ -24,6 +24,16 @@ set -uo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO" || exit 1
 
+# Read the same port variables, with the same defaults, that docker-compose.yml
+# uses. A developer with these set, or with a .env file, would otherwise get a
+# run where every probe tests a port that nothing listens on.
+BANK_BACKEND_PORT="${BANK_BACKEND_PORT:-8085}"
+BANK_FRONTEND_PORT="${BANK_FRONTEND_PORT:-3005}"
+INSURANCE_BACKEND_PORT="${INSURANCE_BACKEND_PORT:-8086}"
+INSURANCE_FRONTEND_PORT="${INSURANCE_FRONTEND_PORT:-3008}"
+HEALTHCARE_BACKEND_PORT="${HEALTHCARE_BACKEND_PORT:-8087}"
+HEALTHCARE_FRONTEND_PORT="${HEALTHCARE_FRONTEND_PORT:-3007}"
+
 PASS=0; FAIL=0
 ok()   { echo "  PASS  $1"; PASS=$((PASS+1)); }
 bad()  { echo "  FAIL  $1"; FAIL=$((FAIL+1)); }
@@ -34,14 +44,56 @@ check_code() { # url expected label
   [ "$code" = "$2" ] && ok "$3 ($code)" || bad "$3 (got $code, want $2)"
 }
 
-check_json() { # url label
-  local body
-  body=$(curl -s --max-time 20 "$1" 2>/dev/null)
-  if [ -n "$body" ] && printf '%s' "$body" | head -c1 | grep -qE '[\[{]'; then
-    ok "$2 (${#body} bytes of JSON)"
-  else
-    bad "$2 (no JSON: $(printf '%s' "$body" | head -c 120))"
+# Assert that an API call returned real records.
+#
+# A weaker version of this check only tested that the body starts with [ or {.
+# That passes on an empty list and on a JSON error object, so it proved that
+# the proxy returns JSON and nothing more. This version requires all of:
+#   - HTTP 200
+#   - a body that parses as JSON
+#   - no error shape (a Spring error body carries "status" and "error")
+#   - at least one record
+# A record is a non-empty top-level array, a non-empty list inside an object,
+# or a totalCount above zero.
+check_records() { # url label
+  local body code parsed
+  body=$(curl -s --max-time 20 -w '\n%{http_code}' "$1" 2>/dev/null)
+  code=$(printf '%s' "$body" | tail -1)
+  body=$(printf '%s' "$body" | sed '$d')
+
+  if [ "$code" != "200" ]; then
+    bad "$2 (HTTP $code, want 200)"; return
   fi
+
+  parsed=$(printf '%s' "$body" | python3 -c '
+import json, sys
+try:
+    d = json.load(sys.stdin)
+except Exception as e:
+    print("NOTJSON %s" % e); raise SystemExit
+if isinstance(d, dict) and ("error" in d or (isinstance(d.get("status"), int) and d["status"] >= 400)):
+    print("ERRORBODY %s" % json.dumps(d)[:120]); raise SystemExit
+n = None
+if isinstance(d, list):
+    n = len(d)
+elif isinstance(d, dict):
+    if isinstance(d.get("totalCount"), int):
+        n = d["totalCount"]
+    else:
+        for v in d.values():
+            if isinstance(v, list):
+                n = len(v); break
+print("COUNT %s" % ("?" if n is None else n))
+' 2>/dev/null)
+
+  case "$parsed" in
+    COUNT\ 0)   bad "$2 (HTTP 200 but zero records - the database returned nothing)" ;;
+    COUNT\ \?)  bad "$2 (HTTP 200, JSON, but no recognisable record list: $(printf '%s' "$body" | head -c 100))" ;;
+    COUNT\ *)   ok  "$2 (HTTP 200, ${parsed#COUNT } records)" ;;
+    ERRORBODY*) bad "$2 (HTTP 200 but an error body: ${parsed#ERRORBODY })" ;;
+    NOTJSON*)   bad "$2 (HTTP 200 but not JSON: $(printf '%s' "$body" | head -c 100))" ;;
+    *)          bad "$2 (check failed: $parsed)" ;;
+  esac
 }
 
 echo "=============================================="
@@ -80,7 +132,7 @@ for line in sys.stdin:
         if 'healthy' in str(d.get('Health','')): n+=1
 print(n)
 " 2>/dev/null || echo 0)
-  echo "  t=${i}0s  healthy containers: $healthy"
+  echo "  t=$((i * 5))s  healthy containers: $healthy"
   [ "${healthy:-0}" -ge 6 ] && break
   sleep 5
 done
@@ -92,15 +144,15 @@ echo
 echo "=============================================="
 echo "3. Backends answer directly"
 echo "=============================================="
-check_code "http://localhost:8085/api-docs" 200 "bank backend /api-docs"
-check_code "http://localhost:8086/api-docs" 200 "insurance backend /api-docs"
-check_code "http://localhost:8087/api-docs" 200 "healthcare backend /api-docs"
+check_code "http://localhost:${BANK_BACKEND_PORT}/api-docs" 200 "bank backend /api-docs"
+check_code "http://localhost:${INSURANCE_BACKEND_PORT}/api-docs" 200 "insurance backend /api-docs"
+check_code "http://localhost:${HEALTHCARE_BACKEND_PORT}/api-docs" 200 "healthcare backend /api-docs"
 
 echo
 echo "=============================================="
 echo "4. Frontends serve the Vite bundle"
 echo "=============================================="
-for pair in "3005:bank" "3008:insurance" "3007:healthcare"; do
+for pair in "${BANK_FRONTEND_PORT}:bank" "${INSURANCE_FRONTEND_PORT}:insurance" "${HEALTHCARE_FRONTEND_PORT}:healthcare"; do
   port=${pair%%:*}; name=${pair##*:}
   check_code "http://localhost:${port}/" 200 "${name} frontend index"
 
@@ -128,18 +180,30 @@ echo
 echo "=============================================="
 echo "5. SPA fallback routing through nginx"
 echo "=============================================="
-check_code "http://localhost:3005/customers"     200 "bank SPA route /customers"
-check_code "http://localhost:3008/claims"        200 "insurance SPA route /claims"
-check_code "http://localhost:3007/patients"      200 "healthcare SPA route /patients"
+check_code "http://localhost:${BANK_FRONTEND_PORT}/customers"      200 "bank SPA route /customers"
+check_code "http://localhost:${INSURANCE_FRONTEND_PORT}/claims"    200 "insurance SPA route /claims"
+check_code "http://localhost:${HEALTHCARE_FRONTEND_PORT}/patients" 200 "healthcare SPA route /patients"
 
 echo
 echo "=============================================="
 echo "6. Frontend nginx proxies /api to the backend"
 echo "=============================================="
-# This is the real integration proof: browser-origin path reaches the DB tier.
-check_json "http://localhost:3005/api/branches?database=TESTING"  "bank /api/branches via frontend proxy"
-check_json "http://localhost:3008/api/policies?database=TESTING"  "insurance /api/policies via frontend proxy"
-check_json "http://localhost:3007/api/patients?database=TESTING"  "healthcare /api/patients via frontend proxy"
+# This is the real integration proof: a browser-origin path reaches the database.
+#
+# The SEED database is the one that all three applications populate. The bank
+# application seeds only its _seed and _prod databases, so bank_testing holds
+# the schema and no rows. That is by design, not a fault, so a records check
+# against TESTING would fail for the bank application only.
+check_records "http://localhost:${BANK_FRONTEND_PORT}/api/branches?database=SEED"       "bank /api/branches via frontend proxy"
+check_records "http://localhost:${INSURANCE_FRONTEND_PORT}/api/policies?database=SEED"  "insurance /api/policies via frontend proxy"
+check_records "http://localhost:${HEALTHCARE_FRONTEND_PORT}/api/patients?database=SEED" "healthcare /api/patients via frontend proxy"
+
+# The TESTING database is what each application selects by default. Prove that
+# the route answers cleanly there too. Do not assert records: bank_testing is
+# intentionally empty.
+check_code "http://localhost:${BANK_FRONTEND_PORT}/api/branches?database=TESTING"       200 "bank /api/branches on TESTING"
+check_code "http://localhost:${INSURANCE_FRONTEND_PORT}/api/policies?database=TESTING"  200 "insurance /api/policies on TESTING"
+check_code "http://localhost:${HEALTHCARE_FRONTEND_PORT}/api/patients?database=TESTING" 200 "healthcare /api/patients on TESTING"
 
 echo
 echo "=============================================="
