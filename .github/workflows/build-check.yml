@@ -84,3 +84,41 @@ jobs:
 
       - name: Build
         run: ./gradlew build
+
+  # The Docker image is the deploy artifact, not the local build directory. The
+  # two jobs above prove that the code compiles on a runner. They do not prove
+  # that the image builds. The two differ: the image build runs npm ci against
+  # the lockfile on a different base image, and it depends on .dockerignore to
+  # keep a host node_modules out of the build context.
+  image:
+    name: Build ${{ matrix.app }} ${{ matrix.tier }} image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - bank
+          - healthcare
+          - insurance
+        tier:
+          - frontend
+          - backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      # load: false and push: false. The job proves the build and keeps nothing.
+      - name: Build image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./${{ matrix.app }}_app/${{ matrix.tier }}
+          file: ./${{ matrix.app }}_app/${{ matrix.tier }}/Dockerfile
+          push: false
+          load: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
