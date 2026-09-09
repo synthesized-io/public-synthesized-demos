@@ -1,15 +1,19 @@
 # Multi-stage Docker build for React application
-FROM node:18-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install --omit=dev
+RUN npm ci
 
 # Copy source code
 COPY . .
+
+# Backend URL is replaced at build time by vite.config.js
+ARG REACT_APP_BACKEND_URL
+ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
 
 # Build the React app
 RUN npm run build

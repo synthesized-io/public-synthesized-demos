@@ -1,0 +1,150 @@
+name: build-check
+
+# Build-only safety net for pull requests.
+#
+# Why this workflow exists:
+# - The ci.yml workflow builds and pushes the bank application only. A break in
+#   the healthcare or the insurance application reaches main with no warning.
+# - The three frontends move from Create React App to Vite. That change can
+#   break a build in one application and not in another.
+#
+# This workflow pushes nothing. It has no AWS credentials and no registry login.
+# It only proves that each of the six components still compiles.
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+# Least privilege. The jobs only read the repository code.
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Build ${{ matrix.app }} frontend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - bank
+          - healthcare
+          - insurance
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}_app/frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # Vite 8 needs Node 20.19 or later. Node 22 is the current LTS release.
+      - name: Set up Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: ${{ matrix.app }}_app/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm run test
+
+      # This step fails the job on a high or critical advisory. The three
+      # frontends are at zero vulnerabilities on this branch. The step keeps
+      # them there, and it names the pull request that introduces a new one.
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+
+      - name: Build
+        run: npm run build
+
+      # The steps above all passed while every application rendered a blank
+      # page. The unit tests run through the Vite dev transform, not through
+      # the production bundle, and the end-to-end script never executes the
+      # JavaScript. A MUI icon import that resolved to the wrong shape under
+      # Vite 8 broke all three applications and no check saw it.
+      #
+      # This step loads the real build in Chromium, walks every route, and
+      # fails on a blank page or on a page error. It is the only check that
+      # runs the shipped JavaScript.
+      # playwright is a devDependency of each frontend, so `npm ci` above
+      # already installed the package. Only the browser binary is missing.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser smoke test
+        run: node ../../scripts/browser-smoke.mjs ${{ matrix.app }}
+
+  backend:
+    name: Build ${{ matrix.app }} backend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - bank
+          - healthcare
+          - insurance
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}_app/backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      # This step only sets up Gradle and its cache. It runs no build.
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build
+        run: ./gradlew build
+
+  # The Docker image is the deploy artifact, not the local build directory. The
+  # two jobs above prove that the code compiles on a runner. They do not prove
+  # that the image builds. The two differ: the image build runs npm ci against
+  # the lockfile on a different base image, and it depends on .dockerignore to
+  # keep a host node_modules out of the build context.
+  image:
+    name: Build ${{ matrix.app }} ${{ matrix.tier }} image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - bank
+          - healthcare
+          - insurance
+        tier:
+          - frontend
+          - backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      # load: false and push: false. The job proves the build and keeps nothing.
+      - name: Build image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./${{ matrix.app }}_app/${{ matrix.tier }}
+          file: ./${{ matrix.app }}_app/${{ matrix.tier }}/Dockerfile
+          push: false
+          load: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
