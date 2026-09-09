@@ -38,18 +38,7 @@ import {
   Tooltip,
   Stack,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ViewListIcon from '@mui/icons-material/ViewList';
-import ViewModuleIcon from '@mui/icons-material/ViewModule';
-import DescriptionIcon from '@mui/icons-material/Description';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import PersonIcon from '@mui/icons-material/Person';
+import { Search as SearchIcon, FilterList as FilterListIcon, Add as AddIcon, Edit as EditIcon, Assignment as AssignmentIcon, Delete as DeleteIcon, ViewList as ViewListIcon, ViewModule as ViewModuleIcon, Description as DescriptionIcon, AttachMoney as AttachMoneyIcon, CalendarToday as CalendarTodayIcon, Person as PersonIcon } from '@mui/icons-material';
 import { useDatabase } from '../context/DatabaseContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 

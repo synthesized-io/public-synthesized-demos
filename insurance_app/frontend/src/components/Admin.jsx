@@ -23,11 +23,7 @@ import {
   Chip,
   Divider,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import DescriptionIcon from '@mui/icons-material/Description';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import BadgeIcon from '@mui/icons-material/Badge';
+import { Add as AddIcon, PersonAdd as PersonAddIcon, Description as DescriptionIcon, Assignment as AssignmentIcon, Badge as BadgeIcon } from '@mui/icons-material';
 import { useDatabase } from '../context/DatabaseContext';
 
 function TabPanel({ children, value, index }) {

@@ -22,15 +22,7 @@ import { useDatabase } from '../context/DatabaseContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import MedicationIcon from '@mui/icons-material/Medication';
-import PersonIcon from '@mui/icons-material/Person';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import MessageIcon from '@mui/icons-material/Message';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import { CalendarToday as CalendarTodayIcon, Medication as MedicationIcon, Person as PersonIcon, LocalHospital as LocalHospitalIcon, EventAvailable as EventAvailableIcon, Assignment as AssignmentIcon, Message as MessageIcon, Favorite as FavoriteIcon, AccessTime as AccessTimeIcon } from '@mui/icons-material';
 
 function WelcomeCard({ statistics }) {
   const theme = useTheme();

@@ -217,9 +217,14 @@ echo "=============================================="
 docker compose ps --format 'table {{.Name}}\t{{.Status}}'
 echo
 echo "Recent backend errors, if any:"
-for c in bank-backend insurance-backend healthcare-backend; do
-  errs=$(docker logs "$c" 2>&1 | grep -icE '\bERROR\b|exception' || true)
-  echo "  $c: $errs error/exception lines"
+# Read the logs through `docker compose logs <service>`, not `docker logs
+# <container name>`. The compose file sets a fixed container_name, so a plain
+# `docker logs bank-backend` can pick up a container of the same name from
+# another project on the same machine and report on the wrong service.
+# `docker compose logs` is scoped to this project.
+for svc in bank-backend insurance-backend healthcare-backend; do
+  errs=$(docker compose logs --no-color "$svc" 2>&1 | grep -icE '\bERROR\b|exception' || true)
+  echo "  $svc: $errs error/exception lines"
 done
 
 echo

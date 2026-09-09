@@ -62,6 +62,23 @@ jobs:
       - name: Build
         run: npm run build
 
+      # The steps above all passed while every application rendered a blank
+      # page. The unit tests run through the Vite dev transform, not through
+      # the production bundle, and the end-to-end script never executes the
+      # JavaScript. A MUI icon import that resolved to the wrong shape under
+      # Vite 8 broke all three applications and no check saw it.
+      #
+      # This step loads the real build in Chromium, walks every route, and
+      # fails on a blank page or on a page error. It is the only check that
+      # runs the shipped JavaScript.
+      # playwright is a devDependency of each frontend, so `npm ci` above
+      # already installed the package. Only the browser binary is missing.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser smoke test
+        run: node ../../scripts/browser-smoke.mjs ${{ matrix.app }}
+
   backend:
     name: Build ${{ matrix.app }} backend
     runs-on: ubuntu-latest

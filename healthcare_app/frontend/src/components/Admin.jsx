@@ -21,10 +21,7 @@ import {
   Chip,
   Divider,
 } from '@mui/material';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import MedicationIcon from '@mui/icons-material/Medication';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import { PersonAdd as PersonAddIcon, CalendarToday as CalendarTodayIcon, Medication as MedicationIcon, LocalHospital as LocalHospitalIcon } from '@mui/icons-material';
 import { useDatabase } from '../context/DatabaseContext';
 
 function Admin() {

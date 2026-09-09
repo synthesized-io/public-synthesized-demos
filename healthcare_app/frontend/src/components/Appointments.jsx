@@ -27,18 +27,7 @@ import {
   Tab,
   InputAdornment,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import PersonIcon from '@mui/icons-material/Person';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import CancelIcon from '@mui/icons-material/Cancel';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { Search as SearchIcon, Add as AddIcon, CalendarToday as CalendarTodayIcon, Person as PersonIcon, LocalHospital as LocalHospitalIcon, AccessTime as AccessTimeIcon, InfoOutlined as InfoOutlinedIcon, Edit as EditIcon, Delete as DeleteIcon, EventAvailable as EventAvailableIcon, Cancel as CancelIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material';
 import { useDatabase } from '../context/DatabaseContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 

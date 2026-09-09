@@ -28,12 +28,7 @@ import {
   CircularProgress,
   Link
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Search as SearchIcon, Add as AddIcon, Edit as EditIcon, AccountBalance as AccountBalanceIcon, Receipt as ReceiptIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { useDatabase } from '../context/DatabaseContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 

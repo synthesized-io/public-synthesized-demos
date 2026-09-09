@@ -26,10 +26,7 @@ import {
   InputLabel,
   Select
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Search as SearchIcon, FilterList as FilterListIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { useDatabase } from '../context/DatabaseContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 

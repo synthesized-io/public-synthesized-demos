@@ -27,11 +27,7 @@ import {
   Select,
   CircularProgress,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import MedicationIcon from '@mui/icons-material/Medication';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Search as SearchIcon, Add as AddIcon, CalendarToday as CalendarTodayIcon, Medication as MedicationIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { useDatabase } from '../context/DatabaseContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 

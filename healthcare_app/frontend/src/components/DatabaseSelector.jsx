@@ -8,7 +8,7 @@ import {
   Typography
 } from '@mui/material';
 import { useDatabase, DATABASE_OPTIONS } from '../context/DatabaseContext';
-import StorageIcon from '@mui/icons-material/Storage';
+import { Storage as StorageIcon } from '@mui/icons-material';
 
 function DatabaseSelector() {
   const { selectedDatabase, setSelectedDatabase } = useDatabase();

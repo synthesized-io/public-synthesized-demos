@@ -29,15 +29,7 @@ import {
   Tooltip,
   CircularProgress,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import CancelIcon from '@mui/icons-material/Cancel';
-import SyncIcon from '@mui/icons-material/Sync';
+import { Search as SearchIcon, FilterList as FilterListIcon, Add as AddIcon, Delete as DeleteIcon, Assignment as AssignmentIcon, CheckCircle as CheckCircleIcon, HourglassEmpty as HourglassEmptyIcon, Cancel as CancelIcon, Sync as SyncIcon } from '@mui/icons-material';
 import { useDatabase } from '../context/DatabaseContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
