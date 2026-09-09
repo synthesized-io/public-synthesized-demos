@@ -1,4 +1,4 @@
-FROM postgres:15-alpine
+FROM postgres:18-alpine
 
 COPY init/ /docker-entrypoint-initdb.d/
 COPY sql/ /docker-entrypoint-initdb.d/sql/

@@ -2,7 +2,7 @@
 # Build stage: a plain JDK image. The Gradle wrapper (gradlew) downloads the
 # Gradle version that gradle/wrapper/gradle-wrapper.properties gives. A gradle:
 # image would add a second Gradle distribution that the build does not use.
-FROM eclipse-temurin:17-jdk AS build
+FROM eclipse-temurin:25-jdk AS build
 WORKDIR /app
 
 # Copy Gradle wrapper and build files
@@ -17,7 +17,7 @@ COPY src/ src/
 RUN ./gradlew build -x test
 
 # Runtime stage
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:25-jre
 WORKDIR /app
 
 # Copy the built JAR from build stage
