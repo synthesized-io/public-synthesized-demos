@@ -38,6 +38,18 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 {{- end }}
 
+{{- define "bank-demo.connectionPort" -}}
+{{/* Same condition as connectionHost. dbExposure.port is the port the
+     LoadBalancer in service-external.yaml listens on, service.port the one the
+     ClusterIP in service.yaml listens on. Both default to 5432, so a mismatch
+     only appears once someone changes one of them. */}}
+{{- if and .Values.dbExposure.enabled .Values.external.enabled -}}
+{{- .Values.dbExposure.port -}}
+{{- else -}}
+{{- .Values.service.port -}}
+{{- end -}}
+{{- end }}
+
 {{- define "bank-demo.sslMode" -}}
 {{- if .Values.database.sslMode -}}
 {{- .Values.database.sslMode -}}
