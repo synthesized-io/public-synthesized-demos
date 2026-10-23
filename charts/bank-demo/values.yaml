@@ -30,6 +30,7 @@ database:
   usernameKey: username
   passwordKey: password
   secretName: bank-database-credentials
+  urlConfigMapName: bank-database-urls
   names:
     seed: bank_seed
     prod: bank_prod
@@ -90,6 +91,7 @@ backend:
     secretName: bank-database-credentials
     usernameKey: username
     passwordKey: password
+    urlConfigMapName: bank-database-urls
     jdbcUrlKeys:
       seed: jdbc-url-seed
       prod: jdbc-url-prod
