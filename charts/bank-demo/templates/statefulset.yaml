@@ -49,9 +49,6 @@ spec:
               chown "$pg_uid:$pg_gid" "$cert_dir" "$cert_dir/server.key" "$cert_dir/server.crt"
               chmod 700 "$cert_dir"
               chmod 600 "$cert_dir/server.key"
-          env:
-            - name: SSL_CERT_CN
-              value: {{ include "bank-demo.connectionHost" . | quote }}
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
