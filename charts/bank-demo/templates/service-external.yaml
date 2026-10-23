@@ -12,10 +12,19 @@ metadata:
     {{- end }}
 spec:
   type: LoadBalancer
+  {{- with .Values.dbExposure.sourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   ports:
     - port: {{ .Values.dbExposure.port }}
       targetPort: {{ .Values.service.port }}
       protocol: TCP
+  {{- /* Without the component label the selector also matches the backend and
+       frontend pods, which carry the same name and instance labels. They would
+       join the NLB target group on port 5432 and never pass a health check.
+       service.yaml and statefulset.yaml already carry the label. */}}
   selector:
     {{- include "bank-demo.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: database
 {{- end }}
