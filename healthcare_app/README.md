@@ -133,7 +133,7 @@ Full API documentation is available via Swagger UI at http://localhost:8087/swag
 ## Technology Stack
 
 **Backend:**
-- Spring Boot 3.2.3
+- Spring Boot 4.1.2
 - Java 17
 - PostgreSQL 15
 - Spring JDBC
