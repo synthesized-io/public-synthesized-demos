@@ -1,0 +1,15 @@
+{{/* The JDBC URLs live here, not in the bank-database-credentials
+     ExternalSecret. That object draws username and password from Password
+     generators, and ESO reconciles it whenever its spec changes, so editing a
+     URL there mints new credentials while the database keeps the old role on
+     its PVC. A ConfigMap lets the URLs change on their own. */}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.database.urlConfigMapName }}
+  labels:
+    {{- include "bank-demo.labels" . | nindent 4 }}
+data:
+  jdbc-url-seed: "jdbc:postgresql://{{ include "bank-demo.connectionHost" . }}:{{ include "bank-demo.connectionPort" . }}/{{ .Values.database.names.seed }}?sslmode={{ include "bank-demo.sslMode" . }}"
+  jdbc-url-prod: "jdbc:postgresql://{{ include "bank-demo.connectionHost" . }}:{{ include "bank-demo.connectionPort" . }}/{{ .Values.database.names.prod }}?sslmode={{ include "bank-demo.sslMode" . }}"
+  jdbc-url-testing: "jdbc:postgresql://{{ include "bank-demo.connectionHost" . }}:{{ include "bank-demo.connectionPort" . }}/{{ .Values.database.names.testing }}?sslmode={{ include "bank-demo.sslMode" . }}"

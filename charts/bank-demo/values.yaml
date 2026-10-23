@@ -30,6 +30,7 @@ database:
   usernameKey: username
   passwordKey: password
   secretName: bank-database-credentials
+  urlConfigMapName: bank-database-urls
   names:
     seed: bank_seed
     prod: bank_prod
@@ -47,10 +48,17 @@ dbExposure:
   enabled: false
   domain: ""
   port: 5432
+  # The default scheme is internal. An internet-facing load balancer with no
+  # source range opens the database security group to 0.0.0.0/0, so make it an
+  # explicit choice: set the scheme annotation to internet-facing and list the
+  # permitted CIDRs in sourceRanges below.
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: nlb
     service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+  # CIDRs that can reach the load balancer. Empty means every address the
+  # scheme reaches.
+  sourceRanges: []
 
 ssl:
   enabled: false
@@ -90,6 +98,7 @@ backend:
     secretName: bank-database-credentials
     usernameKey: username
     passwordKey: password
+    urlConfigMapName: bank-database-urls
     jdbcUrlKeys:
       seed: jdbc-url-seed
       prod: jdbc-url-prod

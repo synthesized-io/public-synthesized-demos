@@ -47,8 +47,8 @@ spec:
               value: $(BANK_DB_PASSWORD)
             - name: SPRING_DATASOURCE_URL
               valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.backend.database.secretName }}
+                configMapKeyRef:
+                  name: {{ .Values.backend.database.urlConfigMapName }}
                   key: {{ .Values.backend.database.jdbcUrlKeys.testing }}
             - name: SPRING_DATASOURCE_SEED_USERNAME
               value: $(BANK_DB_USERNAME)
@@ -56,8 +56,8 @@ spec:
               value: $(BANK_DB_PASSWORD)
             - name: SPRING_DATASOURCE_SEED_URL
               valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.backend.database.secretName }}
+                configMapKeyRef:
+                  name: {{ .Values.backend.database.urlConfigMapName }}
                   key: {{ .Values.backend.database.jdbcUrlKeys.seed }}
             - name: SPRING_DATASOURCE_PROD_USERNAME
               value: $(BANK_DB_USERNAME)
@@ -65,8 +65,8 @@ spec:
               value: $(BANK_DB_PASSWORD)
             - name: SPRING_DATASOURCE_PROD_URL
               valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.backend.database.secretName }}
+                configMapKeyRef:
+                  name: {{ .Values.backend.database.urlConfigMapName }}
                   key: {{ .Values.backend.database.jdbcUrlKeys.prod }}
             - name: SPRING_DATASOURCE_TESTING_USERNAME
               value: $(BANK_DB_USERNAME)
@@ -74,8 +74,8 @@ spec:
               value: $(BANK_DB_PASSWORD)
             - name: SPRING_DATASOURCE_TESTING_URL
               valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.backend.database.secretName }}
+                configMapKeyRef:
+                  name: {{ .Values.backend.database.urlConfigMapName }}
                   key: {{ .Values.backend.database.jdbcUrlKeys.testing }}
           readinessProbe:
             httpGet:
